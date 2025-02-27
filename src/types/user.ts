@@ -12,3 +12,8 @@ export interface UserDTO {
 
     recipes?: RecipeDTO[]; // Liste des recettes créées par l'utilisateur
 }
+
+export interface LoginResponse {
+    accessToken: string;
+    user: UserDTO;
+}

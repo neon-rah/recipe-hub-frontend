@@ -1,65 +1,86 @@
-import { createContext, useState, useEffect, useContext } from "react";
-import api, { setAuthToken, refreshToken } from "@/config/api";
+"use client";
 
-interface User {
-    id: string;
-    name: string;
-    email: string;
-}
+import React, { createContext, useState, useEffect, ReactNode } from "react";
+import { UserDTO } from "../types/user";
+import api, {getAuthToken, setAuthToken} from "@/config/api";
+import {login, logout, register} from "@/lib/api/authApi";
+
+
 
 interface AuthContextType {
-    user: User | null;
-    token: string | null;
-    login: (credentials: { email: string; password: string }) => Promise<void>;
+    user: UserDTO | null;
+    isAuthenticated: boolean;
+    login: (email: string, password: string) => Promise<void>;
+    register: (userDTO: FormData) => Promise<void>;
     logout: () => void;
+    error: string | null;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    const [user, setUser] = useState<User | null>(null);
-    const [token, setToken] = useState<string | null>(null);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+    const [user, setUser] = useState<UserDTO | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
+    // Vérifier si l'utilisateur est authentifié au chargement
     useEffect(() => {
-        const initializeAuth = async () => {
-            const newToken = await refreshToken();
-            if (newToken) {
-                setToken(newToken);
-                setAuthToken(newToken);
-                fetchUser();
+        const fetchUserProfile = async () => {
+            try {
+                const token = getAuthToken();  // Récupérer le token en mémoire
+                if (token) {
+                    setAuthToken(token);
+                    const response = await api.get("/user/profile");
+                    setUser(response.data);  // Mettre à jour l'état avec les infos de l'utilisateur
+                }
+            } catch (err) {
+                console.error("Erreur lors de la récupération du profil", err);
+                setError("Erreur de récupération du profil utilisateur");
             }
         };
-        initializeAuth();
+
+        fetchUserProfile();
     }, []);
 
-    const fetchUser = async () => {
+    const loginHandler = async (email: string, password: string) => {
         try {
-            const res = await api.get("/user/me");
-            setUser(res.data);
+            const data = await login(email, password);
+            setUser(data.user);
+            setAuthToken(data.accessToken);
         } catch (err) {
-            console.error("Erreur lors de la récupération de l'utilisateur", err);
+            setError("Erreur lors de la connexion");
+            console.error("Erreur de connexion", err);
         }
     };
 
-    const login = async (credentials: { email: string; password: string }) => {
-        const res = await api.post("/auth/login", credentials);
-        setAuthToken(res.data.accessToken);
-        setToken(res.data.accessToken);
-        setUser(res.data.user);
+    const registerHandler = async (userDTO: FormData) => {
+        try {
+            const data = await register(userDTO);
+            setUser(data.user);
+            setAuthToken(data.accessToken);
+        } catch (err) {
+            setError("Erreur lors de l'inscription");
+            console.error("Erreur d'inscription", err);
+        }
     };
 
-    const logout = () => {
-        setToken(null);
-        setAuthToken(null);
+    const logoutHandler = () => {
         setUser(null);
-        api.post("/auth/logout");
+        setAuthToken(null);
+        logout();
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout }}>
+        <AuthContext.Provider
+            value={{
+                user,
+                isAuthenticated: !!user,
+                login: loginHandler,
+                register: registerHandler,
+                logout: logoutHandler,
+                error,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );
 };
-
-export const useAuth = () => useContext(AuthContext);

@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
-    const token = req.cookies.get("accessToken")?.value;
+    const token = req.cookies.get("refreshToken")?.value;
 
-    const protectedRoutes = ["/dashboard", "/personnel"];
+    // Définis les routes protégées avec des patrons dynamiques pour inclure toutes les sous-routes
+    const protectedRoutes = ["/dashboard/:path*", "/personal/:path*"];
 
-    if (protectedRoutes.includes(req.nextUrl.pathname) && !token) {
+    // Vérifie si la route actuelle correspond à une route protégée
+    if (protectedRoutes.some((route) => req.nextUrl.pathname.startsWith(route.split(":")[0])) && !token) {
         return NextResponse.redirect(new URL("/login", req.url));
     }
 
@@ -14,5 +16,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/dashboard", "/personnel"],
+    matcher: ["/dashboard/:path*", "/personal/:path*"],
 };
