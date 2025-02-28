@@ -13,7 +13,7 @@ interface ExpandableSearchBarProps {
     value?: string;
     setValue?: (value: string) => void;
     onFilterClick?: () => void;
-    onSearch?: () => void;
+    onSearch?: (query:string) => void;
     variant?: "outline" | "ghost"| "secondary"|"destructive"| "default"|"link";
     filter?: boolean;
     block?: boolean;
@@ -54,7 +54,8 @@ export default function ExpandableSearchBar({
                         block={block}
                         placeholder={placeholder}
                         setValue={(newValue: string) => {
-                            setValue(newValue)}}
+                            setValue(newValue);                            
+                        }}
                         size={size}
                         variant={variant}
                         value={value}

@@ -1,20 +1,36 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+// middleware.ts
+import { NextRequest, NextResponse } from "next/server";
+import {verifyRefreshToken} from "@/config/api";
 
-export function middleware(req: NextRequest) {
-    const token = req.cookies.get("refreshToken")?.value;
 
-    // Définis les routes protégées avec des patrons dynamiques pour inclure toutes les sous-routes
-    const protectedRoutes = ["/dashboard/:path*", "/personal/:path*"];
+export async function middleware(req: NextRequest) {
+    const refreshToken = req.cookies.get("refreshToken")?.value;
+    const publicRoutes = ["/register", "/login", "/api/set-cookie"]; // Ajout de /api/set-cookie
 
-    // Vérifie si la route actuelle correspond à une route protégée
-    if (protectedRoutes.some((route) => req.nextUrl.pathname.startsWith(route.split(":")[0])) && !token) {
+    console.log("Middleware - Chemin demandé:", req.nextUrl.pathname);
+    console.log("Middleware - refreshToken dans cookies:", refreshToken);
+
+    if (publicRoutes.includes(req.nextUrl.pathname)) {
+        console.log("Middleware - Route publique, accès autorisé sans vérification");
+        return NextResponse.next();
+    }
+
+    if (!refreshToken) {
+        console.log("Middleware - Aucun refreshToken, redirection vers /login");
         return NextResponse.redirect(new URL("/login", req.url));
     }
 
+    const isValid = await verifyRefreshToken();
+    console.log("Middleware - Validité du refreshToken:", isValid);
+    if (!isValid) {
+        console.log("Middleware - refreshToken invalide, redirection vers /login");
+        return NextResponse.redirect(new URL("/login", req.url));
+    }
+
+    console.log("Middleware - Token valide, accès autorisé");
     return NextResponse.next();
 }
 
 export const config = {
-    matcher: ["/dashboard/:path*", "/personal/:path*"],
+    matcher: ["/((?!register|login|api\\/set-cookie|_next/static|_next/image|favicon.ico).*)"], // Mise à jour du matcher
 };

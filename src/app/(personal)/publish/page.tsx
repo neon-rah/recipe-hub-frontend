@@ -3,6 +3,7 @@
 
 import { useRouter } from "next/navigation";
 import NewPost from "@/components/features/NewRecipe";
+import ProtectedRoute from "@/components/layout/ProtectedRoute";
 
 export default function PublishPage() {
     const router = useRouter();
@@ -29,8 +30,11 @@ export default function PublishPage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-6">
-            <NewPost onSubmit={handlePostSubmit} />
-        </div>
+        <ProtectedRoute>
+            <div className="max-w-4xl mx-auto p-6">
+                <NewPost onSubmit={handlePostSubmit}/>
+            </div>
+
+        </ProtectedRoute>
     );
 }

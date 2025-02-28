@@ -31,7 +31,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             }
 
             if (onValidationChange) {
-                onValidationChange(valid);
+                // Si onValidationChange attend une fonction avec la valeur
+                if (typeof onValidationChange === 'function' && onValidationChange.length === 1) {
+                    (onValidationChange as (isValid: boolean) => (value: string) => void)(valid)(val);
+                } else {
+                    (onValidationChange as (isValid: boolean) => void)(valid);
+                }
             }
         };
 
@@ -66,7 +71,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     <p className="mt-1 text-small-2 text-gray-600 dark:text-gray-600">{requirementMessage}</p>
                 )}
                 {isTouched && !isValid && errorMessage && (
-                    <p className="mt-1 text-small-2 text-red-600 dark:text-red-600">   {errorMessage}</p>
+                    <p className="mt-1 text-small-2 text-red-600 dark:text-red-600">{errorMessage}</p>
                 )}
             </div>
         );

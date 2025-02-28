@@ -21,7 +21,7 @@ export default function RecipeList({ recipes, onSelectRecipe }: RecipeListProps)
     const selectedRecipes = recipes.slice(startIndex, startIndex + recipesPerPage);
 
     return (
-        <div className="p-4 w-full h-full flex flex-col ">
+        <div className="p-4 w-full h-full flex flex-col pb-24 ">
             {/* Grille des recettes */}
             <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {selectedRecipes.map((recipe) => (

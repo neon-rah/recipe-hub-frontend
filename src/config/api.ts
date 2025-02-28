@@ -1,9 +1,9 @@
+// authApi.ts
 import axios from "axios";
 
-// Créer une instance axios
 const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL,
-    withCredentials: true, // Envoie des cookies (refresh token)
+    baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api",
+    withCredentials: true,
 });
 
 // Définir un token d'authentification en mémoire
@@ -18,13 +18,23 @@ export const setAuthToken = (token: string | null) => {
     }
 };
 
-// Fonction pour récupérer le token en mémoire
 export const getAuthToken = () => authToken;
+
+// Vérifier la validité du refreshToken
+export const verifyRefreshToken = async (): Promise<boolean> => {
+    try {
+        const res = await api.post("/auth/verify-refresh-token"); // Le refreshToken est envoyé via le cookie
+        return res.data.valid;
+    } catch (err) {
+        console.error("Erreur lors de la vérification du refreshToken", err);
+        return false;
+    }
+};
 
 // Rafraîchir le token
 export const refreshToken = async (): Promise<string | null> => {
     try {
-        const res = await api.post("/auth/refresh-token");
+        const res = await api.post("/auth/refresh-token"); // Le refreshToken est envoyé via le cookie
         const newAccessToken = res.data.accessToken;
         setAuthToken(newAccessToken);
         return newAccessToken;
@@ -34,13 +44,11 @@ export const refreshToken = async (): Promise<string | null> => {
     }
 };
 
-// Intercepteur pour gérer les erreurs et le rafraîchissement du token
+// Intercepteur
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
-
-        // Si une erreur 401 se produit, essayer de rafraîchir le token
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             try {
@@ -51,11 +59,11 @@ api.interceptors.response.use(
                 }
             } catch (err) {
                 console.error("Rafraîchissement du token échoué", err);
-                // Ici, gérer la déconnexion ou redirection en cas d'échec
+                if (typeof window !== "undefined") {
+                    window.location.href = "/login";
+                }
             }
         }
-
-        // Retourner l'erreur à l'appelant
         return Promise.reject(error);
     }
 );

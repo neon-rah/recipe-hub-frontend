@@ -1,8 +1,6 @@
 "use client";
 
 
-
-
 import RecipeFilters from "@/components/features/RecipeFilters";
 import ExpandableSearchBar from "@/components/ui/expandable-search-bar";
 

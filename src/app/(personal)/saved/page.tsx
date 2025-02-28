@@ -1,3 +1,6 @@
+"use client";
+
+
 import { SubHeader } from "@/components/ui/subheader";
 
 export default function SavedPage() {

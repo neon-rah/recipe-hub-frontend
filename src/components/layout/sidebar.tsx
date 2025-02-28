@@ -1,3 +1,6 @@
+"use client";
+
+
 import RecipeCard from "@/components/features/RecipeCard";
 import FriendCard from "@/components/features/FriendCard";
 import {recipes} from "@/data/recipes";
