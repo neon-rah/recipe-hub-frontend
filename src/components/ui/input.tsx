@@ -9,7 +9,7 @@ interface InputProps extends React.ComponentProps<"input"> {
     regex?: RegExp | ((value: string) => boolean);
     errorMessage?: string;
     requirementMessage?: string;
-    onValidationChange?: (isValid: boolean) => void;
+    onValidationChange?: (isValid: boolean, value?: string) => void;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -30,19 +30,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 setIsValid(valid);
             }
 
-            if (onValidationChange) {
-                // Si onValidationChange attend une fonction avec la valeur
-                if (typeof onValidationChange === 'function' && onValidationChange.length === 1) {
-                    (onValidationChange as (isValid: boolean) => (value: string) => void)(valid)(val);
-                } else {
-                    (onValidationChange as (isValid: boolean) => void)(valid);
-                }
-            }
+            onValidationChange?.(valid, val); // Appel simplifié
         };
 
         return (
             <div className="w-full relative">
-                {label && (<label className="block pl-1 text-sm font-font-semibold mb-1 text-gray-700">{label}</label>)}
+                {label && (<label className="block pl-1 text-sm font-semibold mb-1 text-gray-700">{label}</label>)}
                 <div className="relative">
                     <input
                         name={props.name}

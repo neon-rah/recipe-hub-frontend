@@ -11,7 +11,7 @@ export default function NotificationsPage() {
     return (
         <ProtectedRoute>
             <div className={"flex justify-center flex-col"}>
-                <SubHeader name="Notifications" icon={<FaBell size={20}/>}/>
+                <SubHeader name="Notifications" icon={<FaBell size={20}/>} sticky={true}/>
                 <div className={"flex flex-col p-6 gap-5 "}>
                     <div className={"flex flex-col justify-content items-center gap-2"}>
                         {

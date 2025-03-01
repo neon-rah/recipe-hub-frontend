@@ -14,7 +14,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         }
     }, [user, loading, router]);
 
-    if (loading) return <div className="text-center">Chargement...</div>; // Affichage temporaire
+    if (loading) return <div className="flex justify-center items-center flex-1 w-full h-full"><span className="loading loading-bars loading-2xl w-[100px] h-[100px] md: loading-xl"></span></div>; // Affichage temporaire
 
     return <>{children}</>;
 };

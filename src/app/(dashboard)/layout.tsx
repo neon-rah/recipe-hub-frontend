@@ -1,14 +1,21 @@
+"use client";
+
 import Navbar from "@/components/layout/NavBar";
 import SideBar from "@/components/layout/sidebar";
 import {ReactNode} from "react";
+import useAuth from "@/hooks/useAuth";
 // import ProtectedRoute from "@/components/layout/ProtectedRoute";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
+    const {user} = useAuth();
+    const profileImage = user?.profilePic
+        ? `${process.env.NEXT_PUBLIC_SERVER_URL}${user.profilePic}`
+        : "/assets/profile-12.png";
     return (
         // <ProtectedRoute>
             <div className="flex h-screen w-full flex-col">
                 {/* Navbar en haut */}
-                <Navbar/>
+                <Navbar profileImage={profileImage}/>
 
                 {/* Contenu principal divisé en 2 sections */}
                 <main className="flex flex-1 justify-center p-4 gap-4 overflow-hidden scrollbar-none ">

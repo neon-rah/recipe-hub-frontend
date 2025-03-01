@@ -23,7 +23,7 @@ export default function PublishPage() {
             // if (!response.ok) throw new Error("Erreur lors de l'envoi des données");
 
             // Rediriger vers la page des recettes après la soumission
-            router.push("/dashboard");
+            router.push("/profile");
         } catch (error) {
             console.error("Erreur lors de la publication :", error);
         }
@@ -31,7 +31,7 @@ export default function PublishPage() {
 
     return (
         <ProtectedRoute>
-            <div className="max-w-4xl mx-auto p-6">
+            <div className="max-w-4xl mx-auto p-6 pb-20">
                 <NewPost onSubmit={handlePostSubmit}/>
             </div>
 

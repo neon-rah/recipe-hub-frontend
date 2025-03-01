@@ -1,12 +1,13 @@
 "use client";
 
 import React, { createContext, useState, useEffect, ReactNode } from "react";
-import { UserDTO } from "@/types/user";
+
 import api, { setAuthToken, getAuthToken } from "@/config/api";
 import { login, logout, register, verifyRefreshToken, refreshToken } from "@/lib/api/authApi";
+import {User} from "@/types/user";
 
 interface AuthContextType {
-    user: UserDTO | null;
+    user: User | null;
     isAuthenticated: boolean;
     login: (email: string, password: string) => Promise<void>;
     register: (userDTO: FormData) => Promise<void>;
@@ -18,7 +19,7 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<UserDTO | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
 
@@ -37,7 +38,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                                 }
                             }
                             );
-                        setUser(res.data);
+                        setUser(new User(res.data));
                         console.log("AuthProvider - État restauré avec accessToken existant, user:", res.data);
                     } catch (err) {
                         console.warn("restoreAuth - AccessToken invalide, tentative de rafraîchissement:", err);
@@ -55,7 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                                         }
                                     }
                                     );
-                                setUser(res.data);
+                                setUser(new User(res.data));
                                 console.log("AuthProvider - État restauré avec refreshToken, user:", res.data);
                             } else {
                                 throw new Error("Failed to refresh access token");
@@ -80,13 +81,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                                     }
                                 }
                                 );
-                            setUser(res.data);
+                            setUser(new User(res.data));
                             console.log("AuthProvider - État restauré avec refreshToken, user:", res.data);
                         } else {
                             throw new Error("Failed to refresh access token");
                         }
                     } else {
-                        console.log("restoreAuth - Aucun token valide, déconnexion");
+                        console.log("restoreAuth - Aucun token valide");
                         // logoutHandler();
                     }
                 }

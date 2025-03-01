@@ -1,4 +1,4 @@
-import { LoginResponse } from "@/types/user";
+import {LoginResponse, User, UserDTO} from "@/types/user";
 
 import { AxiosError } from "axios";
 import api from "@/config/api";
@@ -11,7 +11,10 @@ export const register = async (formData: FormData): Promise<LoginResponse> => {
         });
         const { accessToken, user } = res.data;
         console.log("Réponse register reçue:", { accessToken, user });
-        return { accessToken, user };
+        return { 
+            accessToken,
+            user: new User(user as UserDTO)
+        };
     } catch (err) {
         console.error("Erreur lors de l'inscription:", err);
         throw new Error("Registration failed");
@@ -24,7 +27,10 @@ export const login = async (email: string, password: string): Promise<LoginRespo
         const res = await api.post("/auth/login", { email, password });
         const { accessToken, user } = res.data;
         console.log("Réponse login reçue:", { accessToken, user });
-        return { accessToken, user };
+        return {
+            accessToken,
+            user: new User(user as UserDTO)
+        };
     } catch (err) {
         console.error("Erreur lors de la connexion:", err);
         const axiosError = err as AxiosError<{ message: string }>;

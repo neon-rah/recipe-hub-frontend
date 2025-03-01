@@ -34,7 +34,7 @@ interface NavbarProps {
 }
 
 // Composant principal Navbar
-export default function Navbar({ profileImage = "https://randomuser.me/api/portraits/women/50.jpg" }: NavbarProps) {
+export default function Navbar({ profileImage = "/assets/profile-12.png" }: NavbarProps) {
     return (
         <>
             <DesktopNavigation NAV_LINKS={NAV_LINKS} profileImage={profileImage} />
@@ -96,13 +96,14 @@ const Profile: React.FC<ProfileProps> = ({ profileImage }) => {
     const router = useRouter();
     
     
+    
     const goToProfile = ()=>{
         router.push("/profile");
     }
     
     return (
         <Popover>
-            <PopoverTrigger className={"bg-white dark:bg-gray-900"}>
+            <PopoverTrigger className={"bg-whit e dark:bg-gray-900"}>
                 <div className="w-10 h-10 rounded-full overflow-hidden cursor-pointer border border-gray-300 dark:border-gray-600">
                     <Image src={profileImage} alt="Profile" width={36} height={36} className="object-cover rounded-full" />
                 </div>

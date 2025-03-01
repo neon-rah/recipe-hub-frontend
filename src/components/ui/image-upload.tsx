@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,24 +10,17 @@ interface ImageUploadProps {
     onImageSelect: (file: File | null) => void;
     className?: string;
     shape?: "round" | "square";
-    required?: boolean; // Nouvelle propriété required
+    required?: boolean;
 }
 
 export default function ImageUpload({
                                         onImageSelect,
                                         className,
                                         shape = "round",
-                                        required = false
+                                        required = false,
                                     }: ImageUploadProps) {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-
-    // Appeler onImageSelect au montage pour refléter l'état initial (null si required)
-    useEffect(() => {
-        if (required && !imagePreview) {
-            onImageSelect(null);
-        }
-    }, [required, imagePreview, onImageSelect]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -36,7 +29,7 @@ export default function ImageUpload({
             const allowedExtensions = ["image/jpeg", "image/png", "image/jpg"];
             if (!allowedExtensions.includes(file.type)) {
                 setError("Only JPG, JPEG, and PNG files are allowed.");
-                onImageSelect(null); // Invalider si le fichier n'est pas correct
+                onImageSelect(null); // Invalidate if the file type is incorrect
                 return;
             }
 
@@ -54,14 +47,20 @@ export default function ImageUpload({
 
     return (
         <div className="flex flex-col items-center space-y-4">
-            <div className={cn(
-                "relative w-32 h-32 bg-gray-200 dark:bg-gray-900 flex items-center justify-center overflow-hidden",
-                shape === "round" ? "rounded-full" : "rounded-md",
-                className
-            )}>
+            <div
+                className={cn(
+                    "relative w-32 h-32 bg-gray-200 dark:bg-gray-900 flex items-center justify-center overflow-hidden",
+                    shape === "round" ? "rounded-full" : "rounded-md",
+                    className
+                )}
+            >
                 {imagePreview ? (
                     <>
-                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover rounded-inherit" />
+                        <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="w-full h-full object-cover rounded-inherit"
+                        />
                         <button
                             type="button"
                             className="absolute top-1 right-1 bg-white p-1 rounded-full shadow-md"
@@ -84,7 +83,10 @@ export default function ImageUpload({
             />
 
             <Button asChild>
-                <label htmlFor="file-upload" className="bg-primary dark:bg-primary-dark cursor-pointer">
+                <label
+                    htmlFor="file-upload"
+                    className="bg-primary dark:bg-primary-dark cursor-pointer"
+                >
                     Select Image
                 </label>
             </Button>

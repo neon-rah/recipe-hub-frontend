@@ -1,7 +1,7 @@
 "use client";
 
 import { GiChefToque } from "react-icons/gi";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import ImageUpload from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ export default function RegisterPage() {
         email: false,
         password: false,
         confirmPassword: false,
-        image: false, 
+        image: false,
     });
     const router = useRouter();
 
@@ -42,22 +42,24 @@ export default function RegisterPage() {
         }
     };
 
-    const handleValidationChange = (field: string) => (isValid: boolean) => {
+    const handleValidationChange = (field: string) => (isValid: boolean, value?: string) => {
         setFormValidity(prev => ({
             ...prev,
             [field]: isValid,
         }));
     };
 
-    const handlePasswordChange = (isValid: boolean) => (value: string) => {
-        setPassword(value);
+    const handlePasswordChange = (isValid: boolean, value?: string) => {
+        if (value !== undefined) {
+            setPassword(value);
+        }
         handleValidationChange("password")(isValid);
     };
 
-    const handleImageSelect = (file: File | null) => {
+    const handleImageSelect = useCallback((file: File | null) => {
         setImage(file);
-        handleValidationChange("image")(file !== null); 
-    };
+        handleValidationChange("image")(file !== null);
+    }, []);
 
     const handleCancel = () => {
         setImage(null);
@@ -73,15 +75,15 @@ export default function RegisterPage() {
             image: false,
         });
         const form = document.querySelector("form");
-        if (form) form.reset(); // Réinitialise les champs du formulaire
+        if (form) form.reset();
     };
 
     return (
-        <div className="bg-amber-50 flex flex-col w-full h-[100vh] justify-center items-center">
+        <div className="bg-amber-50 flex flex-col w-full pb-20 justify-center items-center">
             <div className="flex flex-col items-center justify-center">
                 <GiChefToque className="text-4xl text-primary " size={50} />
                 <h2 className="mt-5 mb-10 text-center text-2xl font-bold tracking-tight text-gray-900">
-                    Register to Kaly'Art
+                    Register to Kaly&#39;Art
                 </h2>
             </div>
 
@@ -92,7 +94,7 @@ export default function RegisterPage() {
                     <ImageUpload
                         onImageSelect={handleImageSelect}
                         shape="round"
-                        required={true} // Image obligatoire
+                        required={true}
                     />
                     {image && <p className="text-sm text-gray-500">Selected file: {image.name}</p>}
                     <Input
@@ -146,7 +148,7 @@ export default function RegisterPage() {
                     <div className="mt-10 flex gap-6 justify-end">
                         <Button
                             className="bg-gray-500 text-white hover:bg-gray-400"
-                            type="button" // Changé de "reset" à "button" pour gérer manuellement
+                            type="button"
                             onClick={handleCancel}
                         >
                             Cancel

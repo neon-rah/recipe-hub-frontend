@@ -9,6 +9,8 @@ import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { useState, useEffect } from "react";
 // import {useRouter} from "next/navigation";
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
+import useAuth from "@/hooks/useAuth";
+import {User} from "@/types/user";
 
 // 🔹 Simulation des amis (à remplacer par une requête API plus tard)
 const friends = Array.from({ length: 30 }, (_, index) => ({
@@ -45,9 +47,13 @@ const recipes: Recipe[] = [
     },
 ];
 
-export default function ProfilePage() {
+export default function ProfilePage({params}:never) {
     const [visibleFriends, setVisibleFriends] = useState(6);
     const [isSingleColumn, setIsSingleColumn] = useState(false);
+    const { user } = useAuth();
+
+    const {id} = params;
+    const userProfile = id ? null : user ;
     
 
     // Gestion du responsive pour savoir s'il faut un scroll global ou indépendant
@@ -76,11 +82,11 @@ export default function ProfilePage() {
                     }`}
                 >
                     {/* 🔹 Carte de profil */}
-                    <ProfileCard/>
+                    <ProfileCard user={userProfile}/>
 
                     {/* Liste d'amis */}
                     <div className=" dark:bg-gray-900 p-4 rounded-lg shadow-md flex flex-col">
-                        <h3 className="text-lg font-semibold mb-3">Amis suggérés</h3>
+                        <h3 className="text-lg font-semibold mb-3">Follower</h3>
 
                         {/* Affichage dynamique des amis */}
                         <div className="space-y-3">

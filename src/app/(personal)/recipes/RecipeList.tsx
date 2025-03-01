@@ -5,6 +5,8 @@ import { useState } from "react";
 import { Recipe } from "@/types/labo/recipe";
 import RecipeCard from "@/components/features/RecipeCard";
 import {Pagination} from "@/components/ui/my-pagination";
+import {FaUtensils} from "react-icons/fa";
+import {SubHeader} from "@/components/ui/subheader";
 
 interface RecipeListProps {
     recipes: Recipe[];
