@@ -8,7 +8,8 @@ export async function POST(req: NextRequest) {
     if (!refreshToken) {
         return NextResponse.json({ error: "No refresh token provided" }, { status: 400 });
     }
-
+    console.log("set cookie")
+    
     const response = NextResponse.json({ message: "Cookie set successfully" });
     response.cookies.set({
         name: "refreshToken",

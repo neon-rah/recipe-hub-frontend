@@ -1,21 +1,33 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ImageIcon, XCircleIcon } from "lucide-react";
 
 interface ImageUploadProps {
     onImageSelect: (file: File | null) => void;
     className?: string;
-    shape?: "round" | "square"; // Choix du style d'affichage
+    shape?: "round" | "square";
+    required?: boolean; // Nouvelle propriété required
 }
 
-export default function ImageUpload({ onImageSelect, className, shape = "round" }: ImageUploadProps) {
+export default function ImageUpload({
+                                        onImageSelect,
+                                        className,
+                                        shape = "round",
+                                        required = false
+                                    }: ImageUploadProps) {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+
+    // Appeler onImageSelect au montage pour refléter l'état initial (null si required)
+    useEffect(() => {
+        if (required && !imagePreview) {
+            onImageSelect(null);
+        }
+    }, [required, imagePreview, onImageSelect]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -24,6 +36,7 @@ export default function ImageUpload({ onImageSelect, className, shape = "round" 
             const allowedExtensions = ["image/jpeg", "image/png", "image/jpg"];
             if (!allowedExtensions.includes(file.type)) {
                 setError("Only JPG, JPEG, and PNG files are allowed.");
+                onImageSelect(null); // Invalider si le fichier n'est pas correct
                 return;
             }
 
@@ -41,9 +54,8 @@ export default function ImageUpload({ onImageSelect, className, shape = "round" 
 
     return (
         <div className="flex flex-col items-center space-y-4">
-            {/*<Label className="text-sm font-medium text-gray-700">Upload Image</Label>*/}
-
-            <div className={cn("relative w-32 h-32 bg-gray-200 dark:bg-gray-900 flex items-center justify-center overflow-hidden",
+            <div className={cn(
+                "relative w-32 h-32 bg-gray-200 dark:bg-gray-900 flex items-center justify-center overflow-hidden",
                 shape === "round" ? "rounded-full" : "rounded-md",
                 className
             )}>
@@ -71,11 +83,16 @@ export default function ImageUpload({ onImageSelect, className, shape = "round" 
                 onChange={handleFileChange}
             />
 
-            <Button asChild >
-                <label htmlFor="file-upload" className="bg-primary dark:bg-primary-dark cursor-pointer">Select Image</label>
+            <Button asChild>
+                <label htmlFor="file-upload" className="bg-primary dark:bg-primary-dark cursor-pointer">
+                    Select Image
+                </label>
             </Button>
 
             {error && <p className="text-sm text-red-500">{error}</p>}
+            {required && !imagePreview && !error && (
+                <p className="text-sm text-red-500">Image is required</p>
+            )}
         </div>
     );
 }

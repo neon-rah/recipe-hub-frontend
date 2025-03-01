@@ -12,7 +12,7 @@ export default function ProfileCard() {
             {/* Couverture */}
             <div className="relative h-32 bg-gray-200 rounded-t-xl dark:bg-gray-800 overflow-hidden">
                 <Image
-                    src="/assets/back.png"
+                    src="/assets/back-5.jpg"
                     alt="Cover image"
                     layout="fill"
                     objectFit="cover"

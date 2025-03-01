@@ -20,7 +20,8 @@ export default function RegisterPage() {
         address: false,
         email: false,
         password: false,
-        confirmPassword: false
+        confirmPassword: false,
+        image: false, 
     });
     const router = useRouter();
 
@@ -44,19 +45,41 @@ export default function RegisterPage() {
     const handleValidationChange = (field: string) => (isValid: boolean) => {
         setFormValidity(prev => ({
             ...prev,
-            [field]: isValid
+            [field]: isValid,
         }));
     };
 
     const handlePasswordChange = (isValid: boolean) => (value: string) => {
         setPassword(value);
-        handleValidationChange('password')(isValid);
+        handleValidationChange("password")(isValid);
+    };
+
+    const handleImageSelect = (file: File | null) => {
+        setImage(file);
+        handleValidationChange("image")(file !== null); 
+    };
+
+    const handleCancel = () => {
+        setImage(null);
+        setPassword("");
+        setErrors(null);
+        setFormValidity({
+            lastName: false,
+            firstName: false,
+            address: false,
+            email: false,
+            password: false,
+            confirmPassword: false,
+            image: false,
+        });
+        const form = document.querySelector("form");
+        if (form) form.reset(); // Réinitialise les champs du formulaire
     };
 
     return (
         <div className="bg-amber-50 flex flex-col w-full h-[100vh] justify-center items-center">
             <div className="flex flex-col items-center justify-center">
-                <GiChefToque className="text-4xl text-primary " size={50}/>
+                <GiChefToque className="text-4xl text-primary " size={50} />
                 <h2 className="mt-5 mb-10 text-center text-2xl font-bold tracking-tight text-gray-900">
                     Register to Kaly'Art
                 </h2>
@@ -66,21 +89,25 @@ export default function RegisterPage() {
 
             <form onSubmit={handleSubmit} className="flex w-full justify-center flex-wrap gap-10">
                 <div className="flex w-[350px] flex-col items-center space-y-6">
-                    <ImageUpload onImageSelect={setImage} shape="round"/>
+                    <ImageUpload
+                        onImageSelect={handleImageSelect}
+                        shape="round"
+                        required={true} // Image obligatoire
+                    />
                     {image && <p className="text-sm text-gray-500">Selected file: {image.name}</p>}
                     <Input
                         label="Last Name"
                         regex={FORM_RULES.lastName.regex}
                         errorMessage={FORM_RULES.lastName.errorMessage}
                         name="lastName"
-                        onValidationChange={handleValidationChange('lastName')}
+                        onValidationChange={handleValidationChange("lastName")}
                     />
                     <Input
                         label="First Name"
                         regex={FORM_RULES.firstName.regex}
                         errorMessage={FORM_RULES.firstName.errorMessage}
                         name="firstName"
-                        onValidationChange={handleValidationChange('firstName')}
+                        onValidationChange={handleValidationChange("firstName")}
                     />
                 </div>
 
@@ -90,14 +117,14 @@ export default function RegisterPage() {
                         regex={FORM_RULES.address.regex}
                         errorMessage={FORM_RULES.address.errorMessage}
                         name="address"
-                        onValidationChange={handleValidationChange('address')}
+                        onValidationChange={handleValidationChange("address")}
                     />
                     <Input
                         label="Email"
                         regex={FORM_RULES.email.regex}
                         errorMessage={FORM_RULES.email.errorMessage}
                         name="email"
-                        onValidationChange={handleValidationChange('email')}
+                        onValidationChange={handleValidationChange("email")}
                     />
                     <Input
                         label="Password"
@@ -113,14 +140,14 @@ export default function RegisterPage() {
                         name="confirmPassword"
                         regex={(value) => value === password && value !== ""}
                         errorMessage={password === "" ? "Please enter a password first" : "Passwords do not match"}
-                        
-                        onValidationChange={handleValidationChange('confirmPassword')}
+                        onValidationChange={handleValidationChange("confirmPassword")}
                     />
 
                     <div className="mt-10 flex gap-6 justify-end">
                         <Button
                             className="bg-gray-500 text-white hover:bg-gray-400"
-                            type="reset"
+                            type="button" // Changé de "reset" à "button" pour gérer manuellement
+                            onClick={handleCancel}
                         >
                             Cancel
                         </Button>

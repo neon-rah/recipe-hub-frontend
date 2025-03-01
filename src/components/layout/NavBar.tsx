@@ -10,6 +10,7 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 import {GiChefToque} from "react-icons/gi";
 import {Button} from "@/components/ui/button";
 import {FaUser} from "react-icons/fa6";
+import useAuth from "@/hooks/useAuth";
 
 // Définition du type pour les liens de navigation
 type NavLinkType = {
@@ -94,6 +95,7 @@ interface ProfileProps {
 const Profile: React.FC<ProfileProps> = ({ profileImage }) => {
     const router = useRouter();
     
+    
     const goToProfile = ()=>{
         router.push("/profile");
     }
@@ -140,8 +142,10 @@ const NavLink: React.FC<NavLinkProps> = ({ icon: Icon, name, active, path }) => 
 
 // Bouton de déconnexion
 const LogoutButton = () => {
-    const handleLogout = () => {
-        console.log("Déconnexion...");
+    const {logout} =useAuth();
+    
+    const handleLogout =async () => {
+        logout();
     };
 
     return (

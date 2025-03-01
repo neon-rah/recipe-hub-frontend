@@ -1,9 +1,9 @@
 "use client";
 
 import React, { createContext, useState, useEffect, ReactNode } from "react";
-import { UserDTO } from "../types/user";
-import api, { getAuthToken, setAuthToken } from "@/config/api";
-import { login, logout, register } from "@/lib/api/authApi";
+import { UserDTO } from "@/types/user";
+import api, { setAuthToken, getAuthToken } from "@/config/api";
+import { login, logout, register, verifyRefreshToken, refreshToken } from "@/lib/api/authApi";
 
 interface AuthContextType {
     user: UserDTO | null;
@@ -20,40 +20,99 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<UserDTO | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);  // Ajout de l'état `loading`
+    const [loading, setLoading] = useState<boolean>(true);
 
-    // Vérifier si l'utilisateur est authentifié au chargement
     useEffect(() => {
-        const fetchUserProfile = async () => {
-            setLoading(true); // Début du chargement
+        const restoreAuth = async () => {
             try {
-                const token = getAuthToken();  // Récupérer le token en mémoire
-                if (token) {
-                    setAuthToken(token);
-                    const response = await api.get("/user/profile");
-                    setUser(response.data);  // Mettre à jour l'état avec les infos de l'utilisateur
+                const currentAccessToken = getAuthToken();
+                console.log("restoreAuth - AccessToken initial:", currentAccessToken);
+                if (currentAccessToken) {
+                    try {
+                        const res = await api.get("/user/profile",
+                            {
+                                headers: {
+                                    "Authorization": `Bearer ${currentAccessToken}`,
+                                    "Content-Type": "application/json"
+                                }
+                            }
+                            );
+                        setUser(res.data);
+                        console.log("AuthProvider - État restauré avec accessToken existant, user:", res.data);
+                    } catch (err) {
+                        console.warn("restoreAuth - AccessToken invalide, tentative de rafraîchissement:", err);
+                        const isValid = await verifyRefreshToken(null);
+                        console.log("restoreAuth - Token valide:", isValid);
+                        if (isValid) {
+                            const newAccessToken = await refreshToken();
+                            if (newAccessToken) {
+                                setAuthToken(newAccessToken);
+                                const res = await api.get("/user/profile",
+                                    {
+                                        headers: {
+                                            "Authorization": `Bearer ${newAccessToken}`,
+                                            "Content-Type": "application/json"
+                                        }
+                                    }
+                                    );
+                                setUser(res.data);
+                                console.log("AuthProvider - État restauré avec refreshToken, user:", res.data);
+                            } else {
+                                throw new Error("Failed to refresh access token");
+                            }
+                        } else {
+                            console.log("restoreAuth - Token invalide, déconnexion");
+                            logoutHandler();
+                        }
+                    }
+                } else {
+                    const isValid = await verifyRefreshToken(null);
+                    console.log("restoreAuth - Token valide:", isValid);
+                    if (isValid) {
+                        const newAccessToken = await refreshToken();
+                        if (newAccessToken) {
+                            setAuthToken(newAccessToken);
+                            const res = await api.get("/user/profile",
+                                {
+                                    headers: {
+                                        "Authorization": `Bearer ${newAccessToken}`,
+                                        "Content-Type": "application/json"
+                                    }
+                                }
+                                );
+                            setUser(res.data);
+                            console.log("AuthProvider - État restauré avec refreshToken, user:", res.data);
+                        } else {
+                            throw new Error("Failed to refresh access token");
+                        }
+                    } else {
+                        console.log("restoreAuth - Aucun token valide, déconnexion");
+                        // logoutHandler();
+                    }
                 }
             } catch (err) {
-                console.error("Erreur lors de la récupération du profil", err);
-                setError("Erreur de récupération du profil utilisateur");
-                setUser(null);
+                console.error("restoreAuth - Erreur lors de la restauration:", err);
+                setError("Erreur lors de la vérification initiale");
+                // logoutHandler();
             } finally {
-                setLoading(false); // Fin du chargement
+                setLoading(false);
             }
         };
 
-        fetchUserProfile();
+        restoreAuth();
     }, []);
 
     const loginHandler = async (email: string, password: string) => {
         setLoading(true);
         try {
-            const data = await login(email, password);
-            setUser(data.user);
-            setAuthToken(data.accessToken);
+            const { accessToken, user } = await login(email, password);
+            setUser(user);
+            setAuthToken(accessToken);
+            console.log("AuthProvider - Connexion réussie, user:", user);
         } catch (err) {
             setError("Erreur lors de la connexion");
-            console.error("Erreur de connexion", err);
+            console.error("AuthProvider - Erreur de connexion:", err);
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -62,12 +121,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const registerHandler = async (userDTO: FormData) => {
         setLoading(true);
         try {
-            const data = await register(userDTO);
-            setUser(data.user);
-            setAuthToken(data.accessToken);
+            const { accessToken, user } = await register(userDTO);
+            setUser(user);
+            setAuthToken(accessToken);
+            console.log("AuthProvider - Inscription réussie, user:", user);
         } catch (err) {
             setError("Erreur lors de l'inscription");
-            console.error("Erreur d'inscription", err);
+            console.error("AuthProvider - Erreur d'inscription:", err);
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -77,6 +138,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
         setAuthToken(null);
         logout();
+        console.log("AuthProvider - Déconnexion effectuée");
     };
 
     return (
@@ -87,7 +149,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 login: loginHandler,
                 register: registerHandler,
                 logout: logoutHandler,
-                loading, // Ajout du `loading` dans le contexte
+                loading,
                 error,
             }}
         >

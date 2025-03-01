@@ -4,7 +4,8 @@ import { GiChefToque } from "react-icons/gi";
 import {useEffect, useState} from "react";
 import { useRouter } from "next/navigation";
 import { FORM_RULES } from "@/config/formRules";
-import {login} from "@/lib/api/authApi";
+import useAuth from "@/hooks/useAuth";
+
 
 
 export default function LoginPage() {
@@ -13,6 +14,7 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const router = useRouter();
+    const { login} = useAuth();
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -37,6 +39,10 @@ export default function LoginPage() {
         }
     };
 
+    
+    const goToRegister = () =>{
+        router.push("/register");
+    }
     useEffect(() => {
         if (isLoggedIn) {
             // Attendre un court délai pour garantir que le cookie est stocké
@@ -117,7 +123,7 @@ export default function LoginPage() {
 
                 <p className="mt-10 text-center text-sm text-gray-500">
                     Not a member?{" "}
-                    <a href="#" className="font-semibold text-primary hover:text-orange-700">
+                    <a href="#" onClick={goToRegister} className="font-semibold text-primary hover:text-orange-700">
                         Sign Up here
                     </a>
                 </p>
