@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ interface ImageUploadProps {
     className?: string;
     shape?: "round" | "square";
     required?: boolean;
+    initialImage?: string; // Nouvelle prop pour l'image existante (URL)
 }
 
 export default function ImageUpload({
@@ -18,9 +19,15 @@ export default function ImageUpload({
                                         className,
                                         shape = "round",
                                         required = false,
+                                        initialImage,
                                     }: ImageUploadProps) {
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(initialImage || null);
     const [error, setError] = useState<string | null>(null);
+
+    // Synchroniser imagePreview avec initialImage lorsqu'il change
+    useEffect(() => {
+        setImagePreview(initialImage || null);
+    }, [initialImage]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -29,12 +36,14 @@ export default function ImageUpload({
             const allowedExtensions = ["image/jpeg", "image/png", "image/jpg"];
             if (!allowedExtensions.includes(file.type)) {
                 setError("Only JPG, JPEG, and PNG files are allowed.");
-                onImageSelect(null); // Invalidate if the file type is incorrect
+                setImagePreview(initialImage || null); // Revenir à l'image initiale si erreur
+                onImageSelect(null);
                 return;
             }
 
             setError(null);
-            setImagePreview(URL.createObjectURL(file));
+            const previewUrl = URL.createObjectURL(file);
+            setImagePreview(previewUrl);
             onImageSelect(file);
         }
     };
@@ -49,7 +58,7 @@ export default function ImageUpload({
         <div className="flex flex-col items-center space-y-4">
             <div
                 className={cn(
-                    "relative w-32 h-32 bg-gray-200 dark:bg-gray-900 flex items-center justify-center overflow-hidden",
+                    "relative w-32 h-32 bg-gray-200 dark:bg-gray-900 flex items-center justify-center",
                     shape === "round" ? "rounded-full" : "rounded-md",
                     className
                 )}
@@ -59,7 +68,7 @@ export default function ImageUpload({
                         <img
                             src={imagePreview}
                             alt="Preview"
-                            className="w-full h-full object-cover rounded-inherit"
+                            className={`w-full h-full object-cover rounded-inherit ${shape === "round" ? "rounded-full" : "rounded-md"}`}
                         />
                         <button
                             type="button"

@@ -55,3 +55,9 @@ export interface LoginResponse {
     accessToken: string;
     user: User;
 }
+
+export interface ApiError {
+    status: string;
+    error: string;
+    message: string;
+}

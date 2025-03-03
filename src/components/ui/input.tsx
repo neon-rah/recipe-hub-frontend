@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Eye, EyeOff } from "lucide-react";
+// import { Eye, EyeOff } from "lucide-react";
 
 interface InputProps extends React.ComponentProps<"input"> {
     label?: string;
@@ -13,15 +13,24 @@ interface InputProps extends React.ComponentProps<"input"> {
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-    ({ className, type, label, regex, errorMessage, requirementMessage, onValidationChange, ...props }, ref) => {
-        const [value, setValue] = useState("");
+    ({ className, type, label, regex, errorMessage, requirementMessage, onValidationChange, value: controlledValue, onChange: controlledOnChange, ...props }, ref) => {
+        const [internalValue, setInternalValue] = useState("");
         const [isValid, setIsValid] = useState(false);
         const [isTouched, setIsTouched] = useState(false);
         const [showPassword, setShowPassword] = useState(false);
 
+        // Utiliser la valeur contrôlée si fournie, sinon l'état interne
+        const value = controlledValue !== undefined ? controlledValue : internalValue;
+
         const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             const val = e.target.value;
-            setValue(val);
+
+            // Si contrôlé, appeler onChange du parent
+            if (controlledOnChange) {
+                controlledOnChange(e);
+            } else {
+                setInternalValue(val);
+            }
             setIsTouched(true);
 
             let valid = true;
@@ -30,7 +39,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 setIsValid(valid);
             }
 
-            onValidationChange?.(valid, val); // Appel simplifié
+            onValidationChange?.(valid, val);
         };
 
         return (
@@ -50,7 +59,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                         onChange={handleChange}
                         {...props}
                     />
-                    {type === "password" && (
+                   {/* {type === "password" && (
                         <button
                             type="button"
                             className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
@@ -58,7 +67,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                         >
                             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                         </button>
-                    )}
+                    )}*/}
                 </div>
                 {isTouched && requirementMessage && (
                     <p className="mt-1 text-small-2 text-gray-600 dark:text-gray-600">{requirementMessage}</p>

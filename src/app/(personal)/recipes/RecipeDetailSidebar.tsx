@@ -1,6 +1,6 @@
 "use client";
 
-import { Recipe } from "@/types/labo/recipe";
+import { Recipe } from "@/types/recipe";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import RecipeDetailCard from "@/components/features/RecipeDetailCard";
@@ -12,7 +12,7 @@ interface RecipeDetailSidebarProps {
 
 export default function RecipeDetailSidebar({ recipe, onClose }: RecipeDetailSidebarProps) {
     return (
-        <div className="fixed right-0 w-full sm:w-[400px] md:w-[450px] lg:w-[500px]
+        <div className="fixed  z-40 right-0 w-full sm:w-[400px] md:w-[450px] lg:w-[500px]
                        bg-white dark:bg-gray-900 shadow-xl flex flex-col
                        top-0 h-full md:top-[60px] md:h-[calc(100vh-60px)]">
 

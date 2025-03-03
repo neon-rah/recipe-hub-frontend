@@ -140,12 +140,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setAuthToken(null);
         logout();
         console.log("AuthProvider - Déconnexion effectuée");
-    };
+    };    
 
     return (
         <AuthContext.Provider
             value={{
-                user,
+                user,                
                 isAuthenticated: !!user,
                 login: loginHandler,
                 register: registerHandler,

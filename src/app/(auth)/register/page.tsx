@@ -13,7 +13,14 @@ export default function RegisterPage() {
     const { register } = useAuth();
     const [image, setImage] = useState<File | null>(null);
     const [errors, setErrors] = useState<string | null>(null);
-    const [password, setPassword] = useState("");
+    const [formValues, setFormValues] = useState({
+        lastName: "",
+        firstName: "",
+        address: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+    });
     const [formValidity, setFormValidity] = useState({
         lastName: false,
         firstName: false,
@@ -47,13 +54,12 @@ export default function RegisterPage() {
             ...prev,
             [field]: isValid,
         }));
-    };
-
-    const handlePasswordChange = (isValid: boolean, value?: string) => {
         if (value !== undefined) {
-            setPassword(value);
+            setFormValues(prev => ({
+                ...prev,
+                [field]: value,
+            }));
         }
-        handleValidationChange("password")(isValid);
     };
 
     const handleImageSelect = useCallback((file: File | null) => {
@@ -63,8 +69,15 @@ export default function RegisterPage() {
 
     const handleCancel = () => {
         setImage(null);
-        setPassword("");
         setErrors(null);
+        setFormValues({
+            lastName: "",
+            firstName: "",
+            address: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
+        });
         setFormValidity({
             lastName: false,
             firstName: false,
@@ -75,15 +88,15 @@ export default function RegisterPage() {
             image: false,
         });
         const form = document.querySelector("form");
-        if (form) form.reset();
+        if (form) form.reset(); // Toujours utile pour réinitialiser les champs natifs
     };
 
     return (
-        <div className="bg-amber-50 flex flex-col w-full pb-20 justify-center items-center">
+        <div className="bg-amber-50 flex flex-col w-full h-[100vh] justify-center items-center">
             <div className="flex flex-col items-center justify-center">
                 <GiChefToque className="text-4xl text-primary " size={50} />
                 <h2 className="mt-5 mb-10 text-center text-2xl font-bold tracking-tight text-gray-900">
-                    Register to Kaly&#39;Art
+                    Register to Kaly'Art
                 </h2>
             </div>
 
@@ -102,6 +115,7 @@ export default function RegisterPage() {
                         regex={FORM_RULES.lastName.regex}
                         errorMessage={FORM_RULES.lastName.errorMessage}
                         name="lastName"
+                        value={formValues.lastName}
                         onValidationChange={handleValidationChange("lastName")}
                     />
                     <Input
@@ -109,6 +123,7 @@ export default function RegisterPage() {
                         regex={FORM_RULES.firstName.regex}
                         errorMessage={FORM_RULES.firstName.errorMessage}
                         name="firstName"
+                        value={formValues.firstName}
                         onValidationChange={handleValidationChange("firstName")}
                     />
                 </div>
@@ -119,6 +134,7 @@ export default function RegisterPage() {
                         regex={FORM_RULES.address.regex}
                         errorMessage={FORM_RULES.address.errorMessage}
                         name="address"
+                        value={formValues.address}
                         onValidationChange={handleValidationChange("address")}
                     />
                     <Input
@@ -126,6 +142,7 @@ export default function RegisterPage() {
                         regex={FORM_RULES.email.regex}
                         errorMessage={FORM_RULES.email.errorMessage}
                         name="email"
+                        value={formValues.email}
                         onValidationChange={handleValidationChange("email")}
                     />
                     <Input
@@ -134,14 +151,16 @@ export default function RegisterPage() {
                         regex={FORM_RULES.password.regex}
                         errorMessage={FORM_RULES.password.errorMessage}
                         name="password"
-                        onValidationChange={handlePasswordChange}
+                        value={formValues.password}
+                        onValidationChange={handleValidationChange("password")}
                     />
                     <Input
                         label="Confirm Password"
                         type="password"
                         name="confirmPassword"
-                        regex={(value) => value === password && value !== ""}
-                        errorMessage={password === "" ? "Please enter a password first" : "Passwords do not match"}
+                        regex={(value) => value === formValues.password && value !== ""}
+                        errorMessage={formValues.password === "" ? "Please enter a password first" : "Passwords do not match"}
+                        value={formValues.confirmPassword}
                         onValidationChange={handleValidationChange("confirmPassword")}
                     />
 

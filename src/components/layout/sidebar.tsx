@@ -11,7 +11,7 @@ export default function SideBar(){
         <div className={"flex bg-gray-50 p-5 shadow-xl shadow-gray-200 items-center flex-col gap-5"}>
             <div className={"flex w-full flex-col gap-5"}>
                 <h1 className={"text-primary text-xl font-bold"}>Recipe of the day</h1>
-                <RecipeCard recipe={recipes[1]} />
+                {/*<RecipeCard recipe={recipes[1]} />*/}
             </div>
             <div className={"flex w-full flex-col gap-5"}>
                 <h1 className={"text-primary text-xl font-bold"}>Follow someone</h1>

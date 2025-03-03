@@ -4,6 +4,9 @@ import Navbar from "@/components/layout/NavBar";
 import SideBar from "@/components/layout/sidebar";
 import {ReactNode} from "react";
 import useAuth from "@/hooks/useAuth";
+import {RecipeSyncProvider} from "@/context/recipe-sync-context";
+
+
 // import ProtectedRoute from "@/components/layout/ProtectedRoute";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -13,6 +16,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         : "/assets/profile-12.png";
     return (
         // <ProtectedRoute>
+        <RecipeSyncProvider>
+        
             <div className="flex h-screen w-full flex-col">
                 {/* Navbar en haut */}
                 <Navbar profileImage={profileImage}/>
@@ -32,6 +37,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     </aside>
                 </main>
             </div>
+
+        </RecipeSyncProvider>
 
         // </ProtectedRoute>
 

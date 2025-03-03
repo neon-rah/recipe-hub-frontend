@@ -46,14 +46,21 @@ const recipes: Recipe[] = [
         likes: 95,
     },
 ];
+// Typage des props pour une route catch-all optionnelle
+type ProfilePageProps = {
+    params: {
+        id?: string[]; // id est optionnel et sera un tableau (catch-all)
+    };
+};
 
-export default function ProfilePage({params}:never) {
+export default function ProfilePage({ params }: ProfilePageProps) {
     const [visibleFriends, setVisibleFriends] = useState(6);
     const [isSingleColumn, setIsSingleColumn] = useState(false);
     const { user } = useAuth();
 
-    const {id} = params;
-    const userProfile = id ? null : user ;
+    // Extraire l'id du tableau params.id (undefined si absent)
+    const id = params.id?.[0]; // params.id est un tableau ou undefined
+    const userProfile = id ? null : user;
     
 
     // Gestion du responsive pour savoir s'il faut un scroll global ou indépendant
@@ -130,9 +137,9 @@ export default function ProfilePage({params}:never) {
                     <h2 className="text-2xl font-bold">Mes Recettes</h2>
 
                     {/* Liste des recettes */}
-                    {recipes.map((recipe) => (
-                        <RecipeDetailCard key={recipe.id} recipe={recipe}/>
-                    ))}
+                    {/*{recipes.map((recipe) => (*/}
+                    {/*    <RecipeDetailCard key={recipe.id} recipe={recipe}/>*/}
+                    {/*))}*/}
                 </main>
             </div>
         </ProtectedRoute>

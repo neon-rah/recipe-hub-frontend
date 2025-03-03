@@ -1,105 +1,128 @@
-"use client"; // Nécessaire pour les hooks et les événements
-import React, { useState } from "react";
+"use client";
+
+import { useRecipeForm } from "@/hooks/use-recipe-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { PlusIcon, TrashIcon } from "lucide-react";
-import ImageUpload from "@/components/ui/image-upload"; // Composant personnalisé pour l'upload
-import { REGIONS, CATEGORIES } from "@/config/constants"; // Import des constantes
+import ImageUpload from "@/components/ui/image-upload";
+import { CATEGORIES } from "@/config/constants";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {useRouter} from "next/navigation";
+import Forbidden from "@/components/ui/Forbidden";
 
-interface NewPostProps {
-    onSubmit: (postData: any) => void;
+interface NewRecipeProps {
+    onSubmit: () => void;
+    initialId?: number;
 }
 
-export default function NewPost({ onSubmit }: NewPostProps) {
-    const [formData, setFormData] = useState({
-        title: "",
-        description: "",
-        region: "",
-        category: "",
-        ingredients: [""],
-        preparationSteps: [""],
-        image: null as File | null,
-    });
+export default function NewRecipe({ onSubmit, initialId }: NewRecipeProps) {
+    const router = useRouter();
+    const { formData, errors, submitStatus,isUnauthorized, setSubmitStatus, handleChange, handleSubmit, resetForm } = useRecipeForm(initialId);
+    console.debug("NewRecipe: Rendering with initialId:", initialId);
+    console.debug("NewRecipe: isUnauthorized:", isUnauthorized);
 
-    // Gestion du changement des champs
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (isUnauthorized) {
+        console.debug("NewRecipe: Rendering Forbidden component");
+        return <Forbidden />;
+    }
+
+    console.debug("NewRecipe: Proceeding to render form");
+
+    const isFormValid = () => {
+        const hasNoErrors = Object.values(errors).every((error) => !error);
+        const isFilled =
+            formData.title.trim() !== "" &&
+            formData.description.trim() !== "" &&
+            formData.ingredients.some((ing) => ing.trim() !== "") &&
+            formData.preparationSteps.some((step) => step.trim() !== "") &&
+            formData.category.trim() !== "";
+        // Image facultative pour une mise à jour
+        const isImageValid = initialId ? true : !!formData.image;
+
+        return hasNoErrors && isFilled && isImageValid;
     };
 
-    // Gestion du changement des valeurs du select
-    const handleSelectChange = (name: string, value: string) => {
-        setFormData({ ...formData, [name]: value });
-    };
-
-    // Ajout d'un ingrédient
-    const handleAddIngredient = () => {
-        if (formData.ingredients.some((ing) => ing.trim() === "")) return;
-        setFormData({ ...formData, ingredients: [...formData.ingredients, ""] });
-    };
-
-    // Suppression d'un ingrédient
-    const handleRemoveIngredient = (index: number) => {
-        const updatedIngredients = formData.ingredients.filter((_, i) => i !== index);
-        setFormData({ ...formData, ingredients: updatedIngredients });
-    };
-
-    // Gestion de la modification d'un ingrédient
     const handleIngredientChange = (index: number, value: string) => {
         const updatedIngredients = [...formData.ingredients];
         updatedIngredients[index] = value;
-        setFormData({ ...formData, ingredients: updatedIngredients });
+        handleChange("ingredients", updatedIngredients);
     };
 
-    // Ajout d'une étape de préparation
-    const handleAddPreparationStep = () => {
-        if (formData.preparationSteps.some((step) => step.trim() === "")) return;
-        setFormData({ ...formData, preparationSteps: [...formData.preparationSteps, ""] });
+    const handleAddIngredient = () => {
+        if (formData.ingredients.some((ing) => ing.trim() === "")) return;
+        const updatedIngredients = [...formData.ingredients, ""];
+        handleChange("ingredients", updatedIngredients);
     };
 
-    // Suppression d'une étape de préparation
-    const handleRemovePreparationStep = (index: number) => {
-        const updatedSteps = formData.preparationSteps.filter((_, i) => i !== index);
-        setFormData({ ...formData, preparationSteps: updatedSteps });
+    const handleRemoveIngredient = (index: number) => {
+        const updatedIngredients = formData.ingredients.filter((_, i) => i !== index);
+        handleChange("ingredients", updatedIngredients);
     };
 
-    // Gestion de la modification d'une étape de préparation
     const handlePreparationStepChange = (index: number, value: string) => {
         const updatedSteps = [...formData.preparationSteps];
         updatedSteps[index] = value;
-        setFormData({ ...formData, preparationSteps: updatedSteps });
+        handleChange("preparationSteps", updatedSteps);
     };
 
-    // Gestion de la soumission du formulaire
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!formData.title.trim() || !formData.description.trim()) return;
-        onSubmit({
-            ...formData,
-            ingredients: formData.ingredients.filter((ing) => ing.trim() !== ""),
-            preparationSteps: formData.preparationSteps.filter((step) => step.trim() !== ""),
-        });
+    const handleAddPreparationStep = () => {
+        if (formData.preparationSteps.some((step) => step.trim() === "")) return;
+        const updatedSteps = [...formData.preparationSteps, ""];
+        handleChange("preparationSteps", updatedSteps);
+    };
+
+    const handleRemovePreparationStep = (index: number) => {
+        const updatedSteps = formData.preparationSteps.filter((_, i) => i !== index);
+        handleChange("preparationSteps", updatedSteps);
+    };
+
+    const handleCancel = () => {
+        if (initialId){            
+            router.push("/profile");
+        }
+        resetForm();
     };
 
     return (
         <div className="shadow-gray-700 w-full dark:bg-background-dark/80 p-6 rounded-lg shadow-lg max-w-3xl mx-auto">
-            <h2 className="text-2xl font-semibold text-primary mb-4">New Post</h2>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <h2 className="text-2xl font-semibold text-primary mb-4">{initialId ? "Edit Recipe" : "New Recipe"}</h2>
+            <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
                 <div className="flex flex-wrap gap-6">
-                    {/* Partie gauche - Titre, Description, Ingrédients, Préparation */}
                     <div className="flex-1 space-y-4 min-w-[300px]">
-                        <div >                            
-                            <Input label={"Title"} name="title" value={formData.title} onChange={handleChange} placeholder="Enter recipe title" />
+                        <div>
+                            <Input
+                                label="Title"
+                                name="title"
+                                value={formData.title}
+                                onChange={(e) => handleChange("title", e.target.value)}
+                                placeholder="Enter recipe title"
+                                errorMessage={errors.title}
+                            />
                         </div>
 
-                        <div >
+                        <div>
                             <Label htmlFor="description">Description</Label>
-                            <Textarea name="description" value={formData.description} onChange={handleChange} placeholder="Describe your recipe" />
+                            <Textarea
+                                name="description"
+                                value={formData.description}
+                                onChange={(e) => handleChange("description", e.target.value)}
+                                placeholder="Describe your recipe"
+                            />
+                            {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
                         </div>
 
-                        {/* Ingrédients */}
                         <div className="space-y-2">
                             <Label>Ingredients</Label>
                             {formData.ingredients.map((ingredient, index) => (
@@ -122,12 +145,16 @@ export default function NewPost({ onSubmit }: NewPostProps) {
                                     )}
                                 </div>
                             ))}
-                            <Button type="button" onClick={handleAddIngredient} className="bg-secondary hover:bg-gray-400 dark:bg-secondary-dark dark:hover:bg-gray-400 text-white">
+                            {errors.ingredients && <p className="text-red-500 text-sm">{errors.ingredients}</p>}
+                            <Button
+                                type="button"
+                                onClick={handleAddIngredient}
+                                className="bg-secondary hover:bg-gray-400 dark:bg-secondary-dark dark:hover:bg-gray-400 text-white"
+                            >
                                 <PlusIcon className="w-4 h-4 mr-2" /> Add Ingredient
                             </Button>
                         </div>
 
-                        {/* Préparation */}
                         <div className="space-y-4">
                             <Label>Preparation</Label>
                             {formData.preparationSteps.map((step, index) => (
@@ -138,75 +165,85 @@ export default function NewPost({ onSubmit }: NewPostProps) {
                                         placeholder={`Step ${index + 1}`}
                                     />
                                     {formData.preparationSteps.length > 1 && (
-                                        <Button type="button"
-                                                variant="destructive"
-                                                size="icon"
-                                                className="bg-red-400 hover:bg-red-300 dark:bg-primary-dark"
-                                                onClick={() => handleRemovePreparationStep(index)}>
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            size="icon"
+                                            className="bg-red-400 hover:bg-red-300 dark:bg-primary-dark"
+                                            onClick={() => handleRemovePreparationStep(index)}
+                                        >
                                             <TrashIcon className="w-4 h-4" />
                                         </Button>
                                     )}
                                 </div>
                             ))}
-                            <Button type="button" onClick={handleAddPreparationStep} className="bg-secondary hover:bg-gray-400 dark:bg-secondary-dark dark:hover:bg-gray-400 text-white">
+                            {errors.preparationSteps && <p className="text-red-500 text-sm">{errors.preparationSteps}</p>}
+                            <Button
+                                type="button"
+                                onClick={handleAddPreparationStep}
+                                className="bg-secondary hover:bg-gray-400 dark:bg-secondary-dark dark:hover:bg-gray-400 text-white"
+                            >
                                 <PlusIcon className="w-4 h-4 mr-2" /> Add Step
                             </Button>
                         </div>
                     </div>
 
-                    {/* Partie droite - Région, Catégorie, Image */}
                     <div className="flex-1 space-y-4 min-w-[250px]">
                         <div>
-                            <Label>Region</Label>
-                            <Select value={formData.region} onValueChange={(value) => handleSelectChange("region", value)}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select region" />
-                                </SelectTrigger>
-                                <SelectContent className={"bg-gray-100 dark:bg-black/90"}>
-                                    {REGIONS.map((r) => (
-                                        <SelectItem key={r} value={r}>
-                                            {r}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            
-                        </div>
-
-                        <div>
                             <Label>Category</Label>
-                            <Select value={formData.category} onValueChange={(value) => handleSelectChange("category", value)}>
+                            <Select value={formData.category} onValueChange={(value) => handleChange("category", value)}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select category" />
                                 </SelectTrigger>
-                                <SelectContent className={"bg-gray-100 dark:bg-black/90"}>
+                                <SelectContent className="bg-gray-100 dark:bg-black/90">
                                     {CATEGORIES.map((c) => (
-                                        <SelectItem className={"hover:bg-gray-600"}  key={c} value={c}>
+                                        <SelectItem className="hover:bg-gray-600" key={c} value={c}>
                                             {c}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
+                            {errors.category && <p className="text-red-500 text-sm">{errors.category}</p>}
                         </div>
-                        
-                        <div>                            
-                            <ImageUpload className={"w-full h-[200px]"} shape={"square"} onImageSelect={(file) => setFormData({ ...formData, image: file })} />
-                        </div>       
 
-                        
-
-                       
+                        <div>
+                            <Label>Image</Label>
+                            <ImageUpload
+                                className="w-full h-[200px]"
+                                shape="square"
+                                onImageSelect={(file) => handleChange("image", file)}
+                                initialImage={typeof formData.image === "string" ? formData.image : undefined} // Passer l'URL si c'est une string
+                            />
+                            {errors.image && <p className="text-red-500 text-sm">{errors.image}</p>}
+                        </div>
                     </div>
                 </div>
 
-                {/* Boutons d'action */}
                 <div className="flex justify-end gap-4">
-                    <Button type="button" variant="ghost" className={"w-40"}>
+                    <Button type="button" variant="ghost" className="w-40" onClick={handleCancel}>
                         Cancel
                     </Button>
-                    <Button type="submit" className={"w-40"}>Publish</Button>
+                    <Button type="submit" className="w-40" disabled={!isFormValid()}>
+                        {initialId ? "Update" : "Publish"}
+                    </Button>
                 </div>
-                
+
+                {submitStatus && (
+                    <AlertDialog open={!!submitStatus}>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>{submitStatus.success ? "Success" : "Error"}</AlertDialogTitle>
+                                <AlertDialogDescription>{submitStatus.message}</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel onClick={() => setSubmitStatus(null)}>Close</AlertDialogCancel>
+                                {submitStatus.success && (
+                                    <AlertDialogAction onClick={onSubmit}>Go to Profile</AlertDialogAction>
+                                )}
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                )}
             </form>
         </div>
     );

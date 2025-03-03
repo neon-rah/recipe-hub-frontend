@@ -1,12 +1,11 @@
 import axios from "axios";
+import {refreshToken} from "@/lib/api/authApi";
 
 // Créer une instance axios
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api",
     withCredentials: true, // Activer l'envoi des cookies dans les headers
-    headers: {
-        "Content-Type": "application/json",
-    },
+   
 });
 
 // Définir un token d'authentification en mémoire
@@ -22,6 +21,26 @@ export const setAuthToken = (token: string | null) => {
 };
 
 export const getAuthToken = () => authToken;
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+            try {
+                const newAccessToken = await refreshToken();
+                originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+                return api(originalRequest);
+            } catch (err) {
+                if (typeof window !== "undefined") {
+                    window.location.href = "/login";
+                }
+                return Promise.reject(err);
+            }
+        }
+        return Promise.reject(error);
+    }
+);
 
 export default api;
 
