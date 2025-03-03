@@ -4,7 +4,7 @@
 import { Recipe } from "@/types/recipe";
 import RecipeCard from "@/components/features/RecipeCard";
 import { Pagination } from "@/components/ui/my-pagination";
-import { useRecipeList } from "@/hooks/useRecipeList";
+import { useRecipes } from "@/context/recipe-context";
 import { useRecipeSync } from "@/context/recipe-sync-context";
 import {
     AlertDialog,
@@ -24,9 +24,9 @@ interface RecipeListProps {
 }
 
 export default function RecipeList({ onSelectRecipe }: RecipeListProps) {
-    const { recipes, currentPage, totalPages, loading, error, setError, setCurrentPage } = useRecipeList(12);
+    const { recipes, currentPage, totalPages, loading, error, setError, setPage } = useRecipes();
     const { setInitialStates } = useRecipeSync();
-    const [initialized, setInitialized] = useState(false); // Contrôle l’initialisation
+    const [initialized, setInitialized] = useState(false);
 
     const initializeStates = async () => {
         if (!loading && recipes.length > 0 && !initialized) {
@@ -53,18 +53,21 @@ export default function RecipeList({ onSelectRecipe }: RecipeListProps) {
                     return acc;
                 }, {} as Record<number, boolean>);
 
-                setInitialStates(newLikedStates, newSavedStates, newLikeCounts);
-                setInitialized(true); // Marque comme initialisé pour éviter les réappels
+                setInitialStates(newLikedStates,newSavedStates,newLikeCounts);
+                setInitialized(true);
+                console.log("[RecipeList] States initialized:", { newLikedStates, newLikeCounts, newSavedStates });
             } catch (err: any) {
                 setError(err.message || "Failed to load recipe interactions");
+                console.error("[RecipeList] Error initializing states:", err);
             }
         }
     };
 
-    // Appeler initializeStates uniquement au premier chargement ou changement de page
     if (!initialized && !loading && recipes.length > 0) {
         initializeStates();
     }
+
+    console.log("[RecipeList] Rendered with recipes:", recipes.length);
 
     if (loading) {
         return <div className="p-4 text-center">Loading recipes...</div>;
@@ -92,8 +95,8 @@ export default function RecipeList({ onSelectRecipe }: RecipeListProps) {
                         totalPages={totalPages}
                         currentPage={currentPage}
                         onPageChange={(page) => {
-                            setCurrentPage(page);
-                            setInitialized(false); // Réinitialiser pour charger les nouveaux états
+                            console.log("[RecipeList] Page changed to:", page);
+                            setPage(page);
                         }}
                     />
                 </div>

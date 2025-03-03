@@ -49,3 +49,8 @@ export const getPublicRecipes = async (page: number, size: number) => {
     console.log("information du recipe, recipeapi ",response.data);
     return response.data; // Retourne { content: RecipeDTO[], totalPages: number, ... }
 };
+
+export const searchPublicRecipes = async (query: string, page: number, size: number) => {
+    const response = await api.get(`/recipes/public/search?page=${page}&size=${size}&query=${encodeURIComponent(query)}`);
+    return response.data;
+};
