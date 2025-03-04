@@ -24,7 +24,7 @@ export default function FriendCard({ name, mutualFriends, avatar, className="" }
                 <div>
                     <h3 className="text-sm font-medium text-gray-900 dark:text-white">{name}</h3>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                        {mutualFriends} ami(e){mutualFriends > 1 ? "s" : ""} en commun
+                        {mutualFriends} follower{mutualFriends > 1 ? "s" : ""} 
                     </p>
                 </div>
             </div>
@@ -34,7 +34,7 @@ export default function FriendCard({ name, mutualFriends, avatar, className="" }
                 className="flex items-center gap-1 px-3 py-1 border-gray-400 dark:bg-primary-dark dark:text-gray-900 text-gray-700 "
             >
                 <UserPlus className="w-4 h-4" />
-                Suivre
+                Follow
             </Button>
         </Card>
     );

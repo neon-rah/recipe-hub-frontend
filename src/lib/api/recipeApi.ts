@@ -44,13 +44,19 @@ export const deleteRecipe = async (recipeId: number) => {
     await api.delete(`/recipes/${recipeId}`);
 };
 
-export const getPublicRecipes = async (page: number, size: number) => {
-    const response = await api.get(`/recipes/public?page=${page}&size=${size}`);
-    console.log("information du recipe, recipeapi ",response.data);
-    return response.data; // Retourne { content: RecipeDTO[], totalPages: number, ... }
+export const getPublicRecipes = async (page: number, size: number=12, category?: string) => {
+    const url = category && category !== "All"
+        ? `/recipes/public?page=${page}&size=${size}&category=${encodeURIComponent(category)}`
+        : `/recipes/public?page=${page}&size=${size}`;
+    const response = await api.get(url);
+    return response.data;
 };
 
-export const searchPublicRecipes = async (query: string, page: number, size: number) => {
-    const response = await api.get(`/recipes/public/search?page=${page}&size=${size}&query=${encodeURIComponent(query)}`);
+export const searchPublicRecipes = async (query: string, page: number, size: number, category?: string) => {
+    const baseUrl = `/recipes/public/search?page=${page}&size=${size}&query=${encodeURIComponent(query)}`;
+    const url = category && category !== "All"
+        ? `${baseUrl}&category=${encodeURIComponent(category)}`
+        : baseUrl;
+    const response = await api.get(url);
     return response.data;
 };

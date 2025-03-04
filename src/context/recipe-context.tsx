@@ -5,6 +5,8 @@ import { createContext, useContext, useState, useCallback, useEffect } from "rea
 import { Recipe, RecipeDTO } from "@/types/recipe";
 import { getPublicRecipes, searchPublicRecipes } from "@/lib/api/recipeApi";
 
+export const CATEGORIES = ["Appetizer", "Main Course", "Dessert", "Beverage", "Side Dish"];
+
 interface RecipeContextState {
     recipes: Recipe[];
     currentPage: number;
@@ -12,11 +14,13 @@ interface RecipeContextState {
     loading: boolean;
     error: string | null;
     searchQuery: string;
+    activeCategory: string;
     fetchRecipes: (page: number) => Promise<void>;
     searchRecipes: (query: string, page?: number) => Promise<void>;
     setPage: (page: number) => void;
-    setError:(error:string|null)=> void;
-    resetRecipes: () => Promise<void>; // Nouvelle fonction pour annuler la recherche
+    setError: (error: string|null) => void;
+    resetRecipes: () => Promise<void>;
+    setCategory: (category: string) => void;
 }
 
 const RecipeContext = createContext<RecipeContextState | undefined>(undefined);
@@ -28,12 +32,13 @@ export function RecipeProvider({ children, recipesPerPage = 12 }: { children: Re
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState<string>("");
+    const [activeCategory, setActiveCategory] = useState<string>("All");
 
     const fetchRecipes = useCallback(async (page: number) => {
-        console.log("[RecipeContext] fetchRecipes called with page:", page);
+        console.log("[RecipeContext] fetchRecipes called with page:", page, "category:", activeCategory);
         try {
             setLoading(true);
-            const data = await getPublicRecipes(page - 1, recipesPerPage);
+            const data = await getPublicRecipes(page - 1, recipesPerPage, activeCategory);
             const recipeInstances = data.content.map((dto: RecipeDTO) => new Recipe(dto));
             setRecipes(recipeInstances);
             setTotalPages(data.totalPages);
@@ -44,13 +49,13 @@ export function RecipeProvider({ children, recipesPerPage = 12 }: { children: Re
         } finally {
             setLoading(false);
         }
-    }, [recipesPerPage]);
+    }, [recipesPerPage, activeCategory]);
 
     const searchRecipes = useCallback(async (query: string, page: number = 1) => {
-        console.log("[RecipeContext] searchRecipes called with query:", query, "page:", page);
+        console.log("[RecipeContext] searchRecipes called with query:", query, "page:", page, "category:", activeCategory);
         try {
             setLoading(true);
-            const data = await searchPublicRecipes(query, page - 1, recipesPerPage);
+            const data = await searchPublicRecipes(query, page - 1, recipesPerPage, activeCategory);
             const recipeInstances = data.content.map((dto: RecipeDTO) => new Recipe(dto));
             setRecipes(recipeInstances);
             setTotalPages(data.totalPages);
@@ -63,7 +68,7 @@ export function RecipeProvider({ children, recipesPerPage = 12 }: { children: Re
         } finally {
             setLoading(false);
         }
-    }, [recipesPerPage]);
+    }, [recipesPerPage, activeCategory]);
 
     const setPage = (page: number) => {
         console.log("[RecipeContext] setPage called with page:", page);
@@ -77,12 +82,23 @@ export function RecipeProvider({ children, recipesPerPage = 12 }: { children: Re
 
     const resetRecipes = useCallback(async () => {
         console.log("[RecipeContext] resetRecipes called");
-        setSearchQuery(""); // Réinitialise la requête
-        setCurrentPage(1); // Revient à la première page
-        await fetchRecipes(1); // Recharge toutes les recettes non filtrées
+        setSearchQuery("");
+        setCurrentPage(1);
+        setActiveCategory("All");
+        await fetchRecipes(1);
     }, [fetchRecipes]);
 
-    // Chargement initial
+    const setCategory = (category: string) => {
+        console.log("[RecipeContext] setCategory called with category:", category);
+        setActiveCategory(category);
+        setCurrentPage(1);
+        if (searchQuery) {
+            searchRecipes(searchQuery, 1);
+        } else {
+            fetchRecipes(1);
+        }
+    };
+
     useEffect(() => {
         fetchRecipes(1);
     }, [fetchRecipes]);
@@ -96,11 +112,13 @@ export function RecipeProvider({ children, recipesPerPage = 12 }: { children: Re
                 loading,
                 error,
                 searchQuery,
+                activeCategory,
                 fetchRecipes,
                 searchRecipes,
                 setPage,
                 setError,
                 resetRecipes,
+                setCategory,
             }}
         >
             {children}
