@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { useState, useEffect } from "react";
 // import {useRouter} from "next/navigation";
-import ProtectedRoute from "@/components/layout/ProtectedRoute";
+// import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import useAuth from "@/hooks/useAuth";
 // import {User} from "@/types/user";
 
@@ -76,7 +76,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     }, []);
 
     return (
-        <ProtectedRoute>
+        // <ProtectedRoute>
             <div
                 className={`flex flex-wrap gap-6 w-full m-0 bg-white md:px-7 lg:px-5 scrollbar-none ${
                     isSingleColumn ? "h-[calc(100vh-60px)] overflow-y-auto " : ""
@@ -142,7 +142,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                     {/*))}*/}
                 </main>
             </div>
-        </ProtectedRoute>
+        // </ProtectedRoute>
 
     );
 }

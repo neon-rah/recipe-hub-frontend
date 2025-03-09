@@ -1,12 +1,11 @@
-// /app/hooks/useLike.ts
 "use client";
 
 import { useState } from "react";
 import { toggleLike, isLikedByUser, getLikeCountByRecipe } from "@/lib/api/likeApi";
-import { useRecipeSync } from "@/context/recipe-sync-context";
+import { useRecipeSyncStore } from "@/stores/recipeSyncStore"; // Remplacement de useRecipeSync
 
 export function useLike(recipeId: number) {
-    const { likedStates, likeCounts, setLiked, setLikeCount } = useRecipeSync();
+    const { likedStates, likeCounts, setLiked, setLikeCount } = useRecipeSyncStore();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 

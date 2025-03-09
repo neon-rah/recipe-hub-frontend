@@ -1,12 +1,11 @@
-// /app/hooks/useSavedRecipe.ts
 "use client";
 
 import { useState } from "react";
 import { toggleSavedRecipe, isRecipeSaved } from "@/lib/api/savedRecipeApi";
-import { useRecipeSync } from "@/context/recipe-sync-context";
+import { useRecipeSyncStore } from "@/stores/recipeSyncStore"; // Remplacement de useRecipeSync
 
 export function useSavedRecipe(recipeId: number) {
-    const { savedStates, setSaved } = useRecipeSync();
+    const { savedStates, setSaved } = useRecipeSyncStore();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 

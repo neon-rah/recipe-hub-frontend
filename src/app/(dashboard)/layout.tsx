@@ -4,10 +4,10 @@ import Navbar from "@/components/layout/NavBar";
 import SideBar from "@/components/layout/sidebar";
 import {ReactNode} from "react";
 import useAuth from "@/hooks/useAuth";
-import {RecipeSyncProvider} from "@/context/recipe-sync-context";
+// import {RecipeSyncProvider} from "@/context/recipe-sync-context";
 
 
-// import ProtectedRoute from "@/components/layout/ProtectedRoute";
+import ProtectedRoute from "@/components/layout/ProtectedRoute";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
     const {user} = useAuth();
@@ -15,8 +15,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         ? `${process.env.NEXT_PUBLIC_SERVER_URL}${user.profilePic}`
         : "/assets/profile-12.png";
     return (
-        // <ProtectedRoute>
-        <RecipeSyncProvider>
+        <ProtectedRoute>
+        {/*<RecipeSyncProvider>*/}
         
             <div className="flex h-screen w-full flex-col">
                 {/* Navbar en haut */}
@@ -38,9 +38,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 </main>
             </div>
 
-        </RecipeSyncProvider>
+        {/*</RecipeSyncProvider>*/}
 
-        // </ProtectedRoute>
+        </ProtectedRoute>
 
     );
 }

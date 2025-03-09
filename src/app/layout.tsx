@@ -19,7 +19,11 @@ export default function RootLayout({
       <body
       >
       <AuthProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+              <div className={"flex h-[100vh] justify-center items-center w-full"}>
+                  {children}
+              </div>
+          </ThemeProvider>
       </AuthProvider>
       </body>
       </html>

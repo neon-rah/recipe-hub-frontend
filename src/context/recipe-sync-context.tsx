@@ -33,6 +33,7 @@ export function RecipeSyncProvider({ children }: { children: React.ReactNode }) 
     };
 
     const setLikeCount = (recipeId: number, count: number) => {
+        console.log("liked count appeller");
         setLikeCounts((prev) => ({ ...prev, [recipeId]: count }));
     };
 

@@ -1,11 +1,10 @@
-// /app/components/features/recipe-list.tsx
 "use client";
 
 import { Recipe } from "@/types/recipe";
 import RecipeCard from "@/components/features/RecipeCard";
 import { Pagination } from "@/components/ui/my-pagination";
-import { useRecipes } from "@/context/recipe-context";
-import { useRecipeSync } from "@/context/recipe-sync-context";
+import { useRecipeStore } from "@/stores/recipeStore"; // Remplacement de useRecipes
+import { useRecipeSyncStore } from "@/stores/recipeSyncStore"; // Remplacement de useRecipeSync
 import {
     AlertDialog,
     AlertDialogContent,
@@ -15,7 +14,7 @@ import {
     AlertDialogTitle,
     AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Ajout de useEffect
 import { isLikedByUser, getLikeCountByRecipe } from "@/lib/api/likeApi";
 import { isRecipeSaved } from "@/lib/api/savedRecipeApi";
 
@@ -24,8 +23,8 @@ interface RecipeListProps {
 }
 
 export default function RecipeList({ onSelectRecipe }: RecipeListProps) {
-    const { recipes, currentPage, totalPages, loading, error, setError, setPage } = useRecipes();
-    const { setInitialStates } = useRecipeSync();
+    const { recipes, currentPage, totalPages, loading, error, setError, setPage } = useRecipeStore();
+    const { setInitialStates } = useRecipeSyncStore();
     const [initialized, setInitialized] = useState(false);
 
     const initializeStates = async () => {
@@ -53,7 +52,7 @@ export default function RecipeList({ onSelectRecipe }: RecipeListProps) {
                     return acc;
                 }, {} as Record<number, boolean>);
 
-                setInitialStates(newLikedStates,newSavedStates,newLikeCounts);
+                setInitialStates(newLikedStates, newSavedStates, newLikeCounts);
                 setInitialized(true);
                 console.log("[RecipeList] States initialized:", { newLikedStates, newLikeCounts, newSavedStates });
             } catch (err: any) {
@@ -63,9 +62,10 @@ export default function RecipeList({ onSelectRecipe }: RecipeListProps) {
         }
     };
 
-    if (!initialized && !loading && recipes.length > 0) {
+    // Utiliser useEffect pour initialiser les états quand les recettes changent
+    useEffect(() => {
         initializeStates();
-    }
+    }, [loading, recipes, initialized]);
 
     console.log("[RecipeList] Rendered with recipes:", recipes.length);
 

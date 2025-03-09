@@ -3,7 +3,7 @@
 
 import { SubHeader } from "@/components/ui/subheader";
 import { FaUsers } from "react-icons/fa";
-import ProtectedRoute from "@/components/layout/ProtectedRoute";
+// import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import FriendCard from "@/components/features/FriendCard";
 import { useFollow } from "@/hooks/useFollow";
 import { Badge } from "@/components/ui/badge";
@@ -47,7 +47,7 @@ export default function FollowPage() {
     }
 
     return (
-        <ProtectedRoute>
+        // <ProtectedRoute>
             <div className="flex justify-center flex-col">
                 <SubHeader
                     name="Follow"
@@ -106,6 +106,6 @@ export default function FollowPage() {
                     </div>
                 </div>
             </div>
-        </ProtectedRoute>
+        // </ProtectedRoute>
     );
 }

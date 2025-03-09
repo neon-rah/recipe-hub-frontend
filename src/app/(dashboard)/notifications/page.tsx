@@ -3,7 +3,7 @@
 import { SubHeader } from "@/components/ui/subheader";
 import { FaBell } from "react-icons/fa";
 import NotificationCard from "@/components/features/NotificationCard";
-import ProtectedRoute from "@/components/layout/ProtectedRoute";
+// import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import { Badge } from "@/components/ui/badge";
 import { useNotificationStore } from "@/stores/notificationStore";
 import useAuth from "@/hooks/useAuth";
@@ -35,7 +35,7 @@ export default function NotificationsPage() {
     if (error) return <div className="p-4 text-center text-red-500">{error}</div>;
 
     return (
-        <ProtectedRoute>
+        // <ProtectedRoute>
             <div className="flex justify-center flex-col">
                 <SubHeader
                     name="Notifications"
@@ -83,6 +83,6 @@ export default function NotificationsPage() {
                     </div>
                 </div>
             </div>
-        </ProtectedRoute>
+        // </ProtectedRoute>
     );
 }

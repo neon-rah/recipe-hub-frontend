@@ -1,25 +1,28 @@
-// /app/(personal)/recipes/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Ajout de useEffect
 import { Recipe } from "@/types/recipe";
 import { SubHeader } from "@/components/ui/subheader";
 import { FaUtensils } from "react-icons/fa";
-import { RecipeSyncProvider } from "@/context/recipe-sync-context";
 import RecipeList from "@/app/(personal)/recipes/RecipeList";
 import RecipeDetailSidebar from "@/app/(personal)/recipes/RecipeDetailSidebar";
-import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import ExpandableSearchBar from "@/components/ui/expandable-search-bar";
-import { RecipeProvider, useRecipes, CATEGORIES } from "@/context/recipe-context";
+import { useRecipeStore } from "@/stores/recipeStore";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useRecipeStore } from "@/stores/recipe-store";
+import { CATEGORIES } from "@/stores/recipeStore";
 
 function RecipesPageContent() {
     const [selectedRecipeLocal, setSelectedRecipeLocal] = useState<Recipe | null>(null);
     const [searchQuery, setSearchQuery] = useState<string>("");
-    const { searchRecipes, resetRecipes, activeCategory, setCategory } = useRecipes();
-    const { selectedRecipe, setSelectedRecipe } = useRecipeStore();
+    const { searchRecipes, resetRecipes, activeCategory, setCategory, selectedRecipe, setSelectedRecipe, fetchRecipes } = useRecipeStore();
+
+    // Charger les recettes au montage initial
+    useEffect(() => {
+        if (!searchQuery) {
+            fetchRecipes(1); // Charger les recettes si pas de recherche active
+        }
+    }, [fetchRecipes, searchQuery]);
 
     const handleSearch = (query: string) => {
         console.log("[RecipesPageContent] handleSearch called with query:", query);
@@ -99,13 +102,5 @@ function RecipesPageContent() {
 }
 
 export default function RecipesPage() {
-    return (
-        <ProtectedRoute>
-            <RecipeSyncProvider>
-                <RecipeProvider>
-                    <RecipesPageContent />
-                </RecipeProvider>
-            </RecipeSyncProvider>
-        </ProtectedRoute>
-    );
+    return <RecipesPageContent />;
 }

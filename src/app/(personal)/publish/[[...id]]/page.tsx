@@ -2,7 +2,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import ProtectedRoute from "@/components/layout/ProtectedRoute";
+// import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import NewRecipe from "@/components/features/NewRecipe";
 import {use} from "react";
 
@@ -25,10 +25,10 @@ export default function PublishPage({ params }: PublishPageProps) {
     };
 
     return (
-        <ProtectedRoute>
+        // <ProtectedRoute>
             <div className="max-w-4xl mx-auto p-6 pb-20">
                 <NewRecipe onSubmit={handlePostSubmit} initialId={recipeId} />
             </div>
-        </ProtectedRoute>
+        // </ProtectedRoute>
     );
 }

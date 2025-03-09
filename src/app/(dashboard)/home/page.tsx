@@ -1,39 +1,66 @@
-// /app/(personal)/home/page.tsx
 "use client";
 
 import { SubHeader } from "@/components/ui/subheader";
 import RecipeCard from "@/components/features/RecipeCard";
 import { FaHome } from "react-icons/fa";
-import ProtectedRoute from "@/components/layout/ProtectedRoute";
-import { RecipeSyncProvider } from "@/context/recipe-sync-context";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react"; // Ajout de useState
 import Link from "next/link";
-import { getPublicRecipes } from "@/lib/api/recipeApi";
+import { useRecipeStore } from "@/stores/recipeStore";
+import { useRecipeSyncStore } from "@/stores/recipeSyncStore";
+import { isLikedByUser, getLikeCountByRecipe } from "@/lib/api/likeApi";
+import { isRecipeSaved } from "@/lib/api/savedRecipeApi";
 import { Recipe } from "@/types/recipe";
-import { useRecipeStore } from "@/stores/recipe-store";
 
 export default function HomePage() {
-    const [recentRecipes, setRecentRecipes] = useState<Recipe[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const { setSelectedRecipe } = useRecipeStore();
+    const { recipes, loading, error, fetchRecipes, setSelectedRecipe } = useRecipeStore();
+    const { setInitialStates } = useRecipeSyncStore();
+    const [isInitialized, setIsInitialized] = useState(false); // État pour contrôler l’initialisation
 
+    // Charger les recettes au montage
     useEffect(() => {
-        const fetchRecentRecipes = async () => {
-            try {
-                setLoading(true);
-                const data = await getPublicRecipes(0, 18); // Page 0, 18 recettes
-                setRecentRecipes(data.content.map((dto: any) => new Recipe(dto)));
-            } catch (err: any) {
-                setError(err.message || "Failed to load recent recipes");
-            } finally {
-                setLoading(false);
+        fetchRecipes(1); // Charger les recettes une seule fois
+    }, [fetchRecipes]);
+
+    // Initialiser les états de synchronisation quand les recettes sont chargées
+    useEffect(() => {
+        const initializeSyncStates = async () => {
+            if (!loading && recipes.length > 0 && !isInitialized) {
+                try {
+                    const recipeIds = recipes.slice(0, 18).map((r) => r.id);
+                    const [likedStates, likeCounts, savedStates] = await Promise.all([
+                        Promise.all(recipeIds.map((id) => isLikedByUser(id))),
+                        Promise.all(recipeIds.map((id) => getLikeCountByRecipe(id))),
+                        Promise.all(recipeIds.map((id) => isRecipeSaved(id))),
+                    ]);
+
+                    const newLikedStates = recipeIds.reduce((acc, id, index) => {
+                        acc[id] = likedStates[index];
+                        return acc;
+                    }, {} as Record<number, boolean>);
+
+                    const newLikeCounts = recipeIds.reduce((acc, id, index) => {
+                        acc[id] = likeCounts[index];
+                        return acc;
+                    }, {} as Record<number, number>);
+
+                    const newSavedStates = recipeIds.reduce((acc, id, index) => {
+                        acc[id] = savedStates[index];
+                        return acc;
+                    }, {} as Record<number, boolean>);
+
+                    setInitialStates(newLikedStates, newSavedStates, newLikeCounts);
+                    setIsInitialized(true); // Marquer comme initialisé
+                    console.log("[HomePage] States initialized:", { newLikedStates, newLikeCounts, newSavedStates });
+                } catch (err: any) {
+                    console.error("[HomePage] Error initializing states:", err);
+                }
             }
         };
-        fetchRecentRecipes();
-    }, []);
+
+        initializeSyncStates();
+    }, [loading, recipes, setInitialStates, isInitialized]);
 
     const handleCardClick = (recipe: Recipe) => {
         setSelectedRecipe(recipe);
@@ -49,26 +76,22 @@ export default function HomePage() {
     }
 
     return (
-        <ProtectedRoute>
-            <RecipeSyncProvider>
-                <div className="flex flex-col gap-4 p-6">
-                    <SubHeader name={"Home"} icon={<FaHome size={20} />} sticky={true} />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {recentRecipes.map((recipe) => (
-                            <RecipeCard
-                                key={recipe.id}
-                                recipe={recipe}
-                                onClick={() => handleCardClick(recipe)}
-                            />
-                        ))}
-                    </div>
-                    <div className="mt-6 text-center">
-                        <Link href="/recipes" className="text-blue-500 hover:underline font-semibold">
-                            Find More Recipe here
-                        </Link>
-                    </div>
-                </div>
-            </RecipeSyncProvider>
-        </ProtectedRoute>
+        <div className="flex flex-col gap-4 p-6">
+            <SubHeader name={"Home"} icon={<FaHome size={20} />} sticky={true} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {recipes.slice(0, 18).map((recipe) => (
+                    <RecipeCard
+                        key={recipe.id}
+                        recipe={recipe}
+                        onClick={() => handleCardClick(recipe)}
+                    />
+                ))}
+            </div>
+            <div className="mt-6 text-center">
+                <Link href="/recipes" className="text-blue-500 hover:underline font-semibold">
+                    Find More Recipes here
+                </Link>
+            </div>
+        </div>
     );
 }

@@ -3,7 +3,7 @@
 import {ReactNode} from "react";
 import Navbar from "@/components/layout/NavBar";
 import useAuth from "@/hooks/useAuth";
-// import ProtectedRoute from "@/components/layout/ProtectedRoute";
+import ProtectedRoute from "@/components/layout/ProtectedRoute";
 // import {RecipeSyncProvider} from "@/context/recipe-sync-context";
 
 
@@ -13,8 +13,8 @@ export default function PersonalLayout({ children }: { children: ReactNode }) {
         ? `${process.env.NEXT_PUBLIC_SERVER_URL}${user.profilePic}`
         : "/assets/profile-12.png";
     return (
-        // <ProtectedRoute>
-        //     <RecipeSyncProvider>
+        <ProtectedRoute>
+             {/*<RecipeSyncProvider>*/}
             
                 <div className="flex h-screen w-full flex-col overflow-auto scrollbar-none">
                     {/* Navbar en haut */}
@@ -26,8 +26,8 @@ export default function PersonalLayout({ children }: { children: ReactNode }) {
                     </main>
                 </div>
 
-            // </RecipeSyncProvider>
-            // </ProtectedRoute>
+            {/*</RecipeSyncProvider>*/}
+        </ProtectedRoute>
 
     );
 }
