@@ -15,10 +15,10 @@ export default function SideBar(){
             </div>
             <div className={"flex w-full flex-col gap-5"}>
                 <h1 className={"text-primary text-xl font-bold"}>Follow someone</h1>
-                {Array.from({length:10}).map((_,index)=>(
-                    <FriendCard key={index} name={"Nirina RAHARISOA"} mutualFriends={25} avatar={"/assets/profile.jpg"}/>
-                ))
-                }
+                {/*{Array.from({length:10}).map((_,index)=>(*/}
+                {/*    <FriendCard key={index} name={"Nirina RAHARISOA"} mutualFriends={25} avatar={"/assets/profile.jpg"}/>*/}
+                {/*))*/}
+                {/*}*/}
             </div>
 
         </div>

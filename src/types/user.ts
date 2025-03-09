@@ -1,3 +1,4 @@
+// /app/types/user.ts
 import { RecipeDTO } from "./recipe";
 
 export interface UserDTO {
@@ -9,12 +10,11 @@ export interface UserDTO {
     address: string;
     profilePic: string;
     created: string; // LocalDateTime est stocké en string en JSON
-   
-
     recipes?: RecipeDTO[]; // Liste des recettes créées par l'utilisateur
+    followedAt?: string; // Ajouté précédemment pour les utilisateurs suivis
+    followerCount?: number; // Ajouté pour le nombre de followers
 }
 
-// Classe User implémentant UserDTO avec profileUrl calculé
 export class User implements UserDTO {
     idUser: string;
     lastName: string;
@@ -27,6 +27,8 @@ export class User implements UserDTO {
     recipes?: RecipeDTO[];
     profileUrl: string;
     userName: string;
+    followedAt?: string;
+    followerCount?: number;
 
     constructor(user: UserDTO) {
         this.idUser = user.idUser;
@@ -47,7 +49,30 @@ export class User implements UserDTO {
             : "/assets/profile-1.png";
         this.userName = this.firstName
             ? `${this.firstName} ${this.lastName}`
-            : this.lastName ;
+            : this.lastName;
+        this.followedAt = user.followedAt;
+        this.followerCount = user.followerCount; // Ajouté
+    }
+}
+
+export interface FollowerDTO {
+    idFollow: number;
+    follower: UserDTO;
+    followed: UserDTO;
+    followedAt: string;
+}
+
+export class Follower implements FollowerDTO {
+    idFollow: number;
+    follower: User;
+    followed: User;
+    followedAt: string;
+
+    constructor(follower: FollowerDTO) {
+        this.idFollow = follower.idFollow;
+        this.follower = new User(follower.follower);
+        this.followed = new User(follower.followed);
+        this.followedAt = follower.followedAt;
     }
 }
 

@@ -1,8 +1,8 @@
 "use client";
 
 import ProfileCard from "@/components/features/ProfileCard";
-import FriendCard from "@/components/features/FriendCard";
-import RecipeDetailCard from "@/components/features/RecipeDetailCard";
+// import FriendCard from "@/components/features/FriendCard";
+// import RecipeDetailCard from "@/components/features/RecipeDetailCard";
 import { Recipe } from "@/types/labo/recipe";
 import { Button } from "@/components/ui/button";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
@@ -10,7 +10,7 @@ import { useState, useEffect } from "react";
 // import {useRouter} from "next/navigation";
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import useAuth from "@/hooks/useAuth";
-import {User} from "@/types/user";
+// import {User} from "@/types/user";
 
 // 🔹 Simulation des amis (à remplacer par une requête API plus tard)
 const friends = Array.from({ length: 30 }, (_, index) => ({
@@ -97,9 +97,9 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 
                         {/* Affichage dynamique des amis */}
                         <div className="space-y-3">
-                            {friends.slice(0, visibleFriends).map((friend, index) => (
-                                <FriendCard key={index} {...friend} />
-                            ))}
+                            {/*{friends.slice(0, visibleFriends).map((friend, index) => (*/}
+                            {/*    <FriendCard key={index} {...friend} />*/}
+                            {/*))}*/}
                         </div>
 
                         {/* Boutons "Voir plus" et "Voir moins" */}
@@ -136,7 +136,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                 >
                     <h2 className="text-2xl font-bold">Mes Recettes</h2>
 
-                    {/* Liste des recettes */}
+                    {/*/!* Liste des recettes *!/*/}
                     {/*{recipes.map((recipe) => (*/}
                     {/*    <RecipeDetailCard key={recipe.id} recipe={recipe}/>*/}
                     {/*))}*/}

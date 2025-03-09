@@ -11,7 +11,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getPublicRecipes } from "@/lib/api/recipeApi";
 import { Recipe } from "@/types/recipe";
-import { useRecipeStore } from "@/store/recipe-store";
+import { useRecipeStore } from "@/stores/recipe-store";
 
 export default function HomePage() {
     const [recentRecipes, setRecentRecipes] = useState<Recipe[]>([]);

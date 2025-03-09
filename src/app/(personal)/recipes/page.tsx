@@ -13,7 +13,7 @@ import ExpandableSearchBar from "@/components/ui/expandable-search-bar";
 import { RecipeProvider, useRecipes, CATEGORIES } from "@/context/recipe-context";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useRecipeStore } from "@/store/recipe-store";
+import { useRecipeStore } from "@/stores/recipe-store";
 
 function RecipesPageContent() {
     const [selectedRecipeLocal, setSelectedRecipeLocal] = useState<Recipe | null>(null);
