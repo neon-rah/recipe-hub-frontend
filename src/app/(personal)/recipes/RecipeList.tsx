@@ -20,12 +20,19 @@ import { isRecipeSaved } from "@/lib/api/savedRecipeApi";
 
 interface RecipeListProps {
     onSelectRecipe: (recipe: Recipe) => void;
+    recipesOverride?: Recipe[]; // Optionnel pour SavedRecipesPage
+    loadingOverride?: boolean;
+    errorOverride?: string | null;
 }
 
-export default function RecipeList({ onSelectRecipe }: RecipeListProps) {
-    const { recipes, currentPage, totalPages, loading, error, setError, setPage } = useRecipeStore();
+export default function RecipeList({ onSelectRecipe, recipesOverride, loadingOverride, errorOverride }: RecipeListProps) {
+    const { recipes: storeRecipes, currentPage, totalPages, loading: storeLoading, error: storeError, setError, setPage } = useRecipeStore();
     const { setInitialStates } = useRecipeSyncStore();
     const [initialized, setInitialized] = useState(false);
+
+    const recipes = recipesOverride || storeRecipes;
+    const loading = loadingOverride !== undefined ? loadingOverride : storeLoading;
+    const error = errorOverride !== undefined ? errorOverride : storeError;
 
     const initializeStates = async () => {
         if (!loading && recipes.length > 0 && !initialized) {
@@ -68,6 +75,7 @@ export default function RecipeList({ onSelectRecipe }: RecipeListProps) {
     }, [loading, recipes, initialized]);
 
     console.log("[RecipeList] Rendered with recipes:", recipes.length);
+    console.log("[RecipeList] Rendered with recipes list:", recipes);
 
     if (loading) {
         return <div className="p-4 text-center">Loading recipes...</div>;

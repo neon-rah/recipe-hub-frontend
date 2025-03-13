@@ -9,16 +9,17 @@ import {use} from "react";
 
 // Typage des props pour une route catch-all optionnelle
 type PublishPageProps = {
-    params: Promise<{ id?: string[] }>; // params est maintenant une Promise
+    searchParams: Promise<{ id?: string | string[] }>; // params est maintenant une Promise
 };
 
-export default function PublishPage({ params }: PublishPageProps) {
+export default function PublishPage({ searchParams }: PublishPageProps) {
     const router = useRouter();
-
-    // Déballer params avec React.use()
-    const resolvedParams = use(params);
-    const id = resolvedParams.id?.[0]; // Accéder à id après déballage
+    const resolvedSearchParams = use(searchParams);
+    const id = resolvedSearchParams.id as string | undefined; // Forcer comme string ou undefined
     const recipeId = id ? Number(id) : undefined;
+    
+    console.log("recipeid", recipeId)
+    console.log("idparams", id)
 
     const handlePostSubmit = () => {
         router.push("/profile");

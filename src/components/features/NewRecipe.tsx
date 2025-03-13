@@ -35,10 +35,12 @@ export default function NewRecipe({ onSubmit, initialId }: NewRecipeProps) {
 
     if (isUnauthorized) {
         console.debug("NewRecipe: Rendering Forbidden component");
+        console.debug("NewRecipe: Rendering initialId", initialId);
         return <Forbidden />;
     }
 
     console.debug("NewRecipe: Proceeding to render form");
+    console.debug("NewRecipe: Proceeding to render form with initalid", initialId);
 
     const isFormValid = () => {
         const hasNoErrors = Object.values(errors).every((error) => !error);
@@ -89,7 +91,8 @@ export default function NewRecipe({ onSubmit, initialId }: NewRecipeProps) {
     };
 
     const handleCancel = () => {
-        if (initialId){            
+        if (initialId){    
+            console.log("[new form] reset initial id", initialId);
             router.push("/profile");
         }
         resetForm();

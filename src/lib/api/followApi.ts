@@ -12,21 +12,69 @@ export const unfollowUser = async (followerId: string, followedId: string): Prom
     return response.data;
 };
 
-export const isFollowing = async (followerId: string, followedId: string): Promise<boolean> => {
+export const isFollowingUser = async (followerId: string, followedId: string): Promise<boolean> => {
     const response = await api.get(`/followers/${followerId}/is-following/${followedId}`);
     return response.data;
 };
 
 export const getFollowers = async (userId: string): Promise<Follower[]> => {
     const response = await api.get(`/followers/${userId}/followers`);
-    console.log("[followApi] Raw followers response:", response.data);
-    return response.data.map((f: any) => new Follower(f));
+    return response.data.map((f: any) => ({
+        idFollow: f.idFollow,
+        follower: new User({
+            idUser: f.follower.idUser,
+            lastName: f.follower.lastName,
+            firstName: f.follower.firstName,
+            email: f.follower.email || "",
+            password: undefined,
+            address: f.follower.address || "",
+            profilePic: f.follower.profilePic || "",
+            created: f.follower.created || new Date().toISOString(),
+            followerCount: f.follower.followerCount || 0,
+        }),
+        followed: new User({
+            idUser: f.followed.idUser,
+            lastName: f.followed.lastName,
+            firstName: f.followed.firstName,
+            email: f.followed.email || "",
+            password: undefined,
+            address: f.followed.address || "",
+            profilePic: f.followed.profilePic || "",
+            created: f.followed.created || new Date().toISOString(),
+            followerCount: f.followed.followerCount || 0,
+        }),
+        followedAt: f.followedAt,
+    }));
 };
 
 export const getFollowing = async (userId: string): Promise<Follower[]> => {
     const response = await api.get(`/followers/${userId}/following`);
-    console.log("[followApi] Raw following response:", response.data);
-    return response.data.map((f: any) => new Follower(f));
+    return response.data.map((f: any) => ({
+        idFollow: f.idFollow,
+        follower: new User({
+            idUser: f.follower.idUser,
+            lastName: f.follower.lastName,
+            firstName: f.follower.firstName,
+            email: f.follower.email || "",
+            password: undefined,
+            address: f.follower.address || "",
+            profilePic: f.follower.profilePic || "",
+            created: f.follower.created || new Date().toISOString(),
+            followerCount: f.follower.followerCount || 0,
+        }),
+        followed: new User({
+            idUser: f.followed.idUser,
+            lastName: f.followed.lastName,
+            firstName: f.followed.firstName,
+            email: f.followed.email || "",
+            password: undefined,
+            address: f.followed.address || "",
+            profilePic: f.followed.profilePic || "",
+            created: f.followed.created || new Date().toISOString(),
+            followerCount: f.followed.followerCount || 0,
+        }),
+        followedAt: f.followedAt,
+    }));
 };
 
 export const getFollowerCount = async (userId: string): Promise<number> => {
@@ -34,9 +82,20 @@ export const getFollowerCount = async (userId: string): Promise<number> => {
     return response.data;
 };
 
+export const getFollowingCount = async (userId: string): Promise<number> => {
+    const response = await api.get(`/followers/${userId}/following/count`);
+    return response.data;
+};
+
 export const getSuggestedUsers = async (userId: string): Promise<User[]> => {
     const response = await api.get(`/followers/${userId}/suggestions`);
     console.log("[followApi] Raw suggested users response:", response.data);
+    return response.data.map((u: any) => new User(u));
+};
+
+
+export const getRandomSuggestedUsers = async (userId: string): Promise<User[]> => {
+    const response = await api.get(`/followers/${userId}/random-suggestions`);
     return response.data.map((u: any) => new User(u));
 };
 

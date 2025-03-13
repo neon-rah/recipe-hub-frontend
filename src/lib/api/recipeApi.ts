@@ -60,3 +60,13 @@ export const searchPublicRecipes = async (query: string, page: number, size: num
     const response = await api.get(url);
     return response.data;
 };
+
+export const findRecipesByUserId = async (userId: string) => {
+    const response = await api.get(`/recipes/user/${userId}`);
+    return response.data;
+};
+
+export const getRandomRecipe = async () => {
+    const response = await api.get("/recipes/random");
+    return response.data;
+};

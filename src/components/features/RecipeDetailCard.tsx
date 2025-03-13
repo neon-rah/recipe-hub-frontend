@@ -45,7 +45,7 @@ export default function RecipeDetailCard({ recipe }: RecipeDetailCardProps) {
     };
 
     return (
-        <Card className="p-4 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg shadow-md">
+        <Card className="p-4 bg-white m-0  max-w-[700px] dark:bg-gray-900 dark:text-white rounded-lg shadow-md">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     {recipe.owner?.profileUrl ? (
