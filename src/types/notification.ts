@@ -1,4 +1,4 @@
-import {read} from "node:fs";
+
 
 export interface NotificationDTO {
     idNotif: number;
@@ -12,6 +12,7 @@ export interface NotificationDTO {
     message: string;
     createdAt: string; // LocalDateTime devient string
     read: boolean;
+    seen:boolean;
     relatedEntityId?: number|null; // L'ID de la recette ou utilisateur lié à la notification
     entityType?: "user" | "recipe"; // Type d'entité (soit un user, soit une recette)
 }
@@ -23,6 +24,7 @@ export class Notification implements NotificationDTO{
     idUser: string;
     message: string;
     read: boolean;
+    seen:boolean;
     relatedEntityId?: number | null;
     senderEmail: string;
     senderFirstName: string;
@@ -41,6 +43,7 @@ export class Notification implements NotificationDTO{
         this.idUser = notif.idUser;
         this.message = notif.message;
         this.read = notif.read;
+        this.seen = notif.seen;
         this.relatedEntityId = notif.relatedEntityId;
         this.senderEmail = notif.senderEmail;
         this.senderFirstName = notif.senderFirstName;

@@ -18,6 +18,10 @@ export const markNotificationAsRead = async (notifId: number): Promise<void> => 
     await api.put(`/notifications/${notifId}/mark-read`);
 };
 
+export const markNotificationAsSeen = async ( userId: string) : Promise<void> => {
+    await api.put(`/notifications/${userId}/mark-all-seen`);
+}
+
 export const markAllNotificationsAsRead = async (userId: string): Promise<void> => {
     await api.put(`/notifications/${userId}/mark-all-read`);
 };

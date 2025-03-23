@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import ThemeProvider from "@/providers/ThemeProvider";
 import {AuthProvider} from "@/context/AuthContext";
+import WebSocketProvider from "@/providers/WebSocketProvider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -20,9 +21,11 @@ export default function RootLayout({
       >
       <AuthProvider>
           <ThemeProvider>
+              <WebSocketProvider>
               <div className={"flex h-[100vh] justify-center items-center w-full"}>
                   {children}
               </div>
+              </WebSocketProvider>
           </ThemeProvider>
       </AuthProvider>
       </body>

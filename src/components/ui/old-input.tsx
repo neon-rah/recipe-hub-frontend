@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
+// import { Eye, EyeOff } from "lucide-react";
 
 interface InputProps extends React.ComponentProps<"input"> {
     label?: string;
@@ -12,33 +13,19 @@ interface InputProps extends React.ComponentProps<"input"> {
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-    (
-        {
-            className,
-            type,
-            label,
-            regex,
-            errorMessage,
-            requirementMessage,
-            onValidationChange,
-            value: controlledValue,
-            onChange: controlledOnChange,
-            ...props
-        },
-        ref
-    ) => {
+    ({ className, type, label, regex, errorMessage, requirementMessage, onValidationChange, value: controlledValue, onChange: controlledOnChange, ...props }, ref) => {
         const [internalValue, setInternalValue] = useState("");
-        const [isValid, setIsValid] = useState<boolean | null>(null); // null si pas encore validé
+        const [isValid, setIsValid] = useState(false);
         const [isTouched, setIsTouched] = useState(false);
         const [showPassword, setShowPassword] = useState(false);
 
-        // Utiliser la valeur contrôlée si fournie, sinon l’état interne
+        // Utiliser la valeur contrôlée si fournie, sinon l'état interne
         const value = controlledValue !== undefined ? controlledValue : internalValue;
 
         const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             const val = e.target.value;
 
-            // Mettre à jour la valeur
+            // Si contrôlé, appeler onChange du parent
             if (controlledOnChange) {
                 controlledOnChange(e);
             } else {
@@ -46,34 +33,18 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             }
             setIsTouched(true);
 
-            // Validation
-            let valid: boolean | null = null;
+            let valid = true;
             if (regex) {
                 valid = regex instanceof RegExp ? regex.test(val) : regex(val);
                 setIsValid(valid);
-            } else {
-                // Si pas de regex, considérer comme valide dès qu’il y a une valeur
-                valid = val.length > 0;
-                setIsValid(valid);
             }
 
-            onValidationChange?.(valid ?? true, val);
-        };
-
-        // Déterminer les classes de bordure en fonction de l’état
-        const getBorderClass = () => {
-            if (!isTouched) return "border-gray-300"; // État initial
-            if (isValid === null) return "border-gray-300"; // Pas de validation encore
-            return isValid ? "border-green-500 focus:ring-green-500" : "border-red-500 focus:ring-red-500";
+            onValidationChange?.(valid, val);
         };
 
         return (
             <div className="w-full relative">
-                {label && (
-                    <label className="block pl-1 text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">
-                        {label}
-                    </label>
-                )}
+                {label && (<label className="block pl-1 text-sm font-semibold mb-1 text-gray-700">{label}</label>)}
                 <div className="relative">
                     <input
                         name={props.name}
@@ -81,15 +52,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                         value={value}
                         className={cn(
                             "flex h-11 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 pr-10",
-                            getBorderClass(), // Appliquer les classes dynamiquement
+                            !isValid && isTouched ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-primary",
                             className
                         )}
                         ref={ref}
                         onChange={handleChange}
                         {...props}
                     />
-                    {/* Bouton pour montrer/masquer le mot de passe (désactivé pour l’instant)
-                    {type === "password" && (
+                    {/* {type === "password" && (
                         <button
                             type="button"
                             className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
@@ -97,14 +67,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                         >
                             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                         </button>
-                    )}
-                    */}
+                    )}*/}
                 </div>
                 {isTouched && requirementMessage && (
-                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{requirementMessage}</p>
+                    <p className="mt-1 text-small-2 text-gray-600 dark:text-gray-600">{requirementMessage}</p>
                 )}
-                {isTouched && isValid === false && errorMessage && (
-                    <p className="mt-1 text-sm text-red-600 dark:text-red-500">{errorMessage}</p>
+                {isTouched && !isValid && errorMessage && (
+                    <p className="mt-1 text-small-2 text-red-600 dark:text-red-600">{errorMessage}</p>
                 )}
             </div>
         );
