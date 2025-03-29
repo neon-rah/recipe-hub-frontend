@@ -1,19 +1,130 @@
+/* src/app/global.css */
+
+/* Importation des directives Tailwind */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-    @apply font-sans bg-background text-text dark:bg-background-dark dark:text-text-dark;
+/* Styles de base avec Tailwind */
+@layer base {
+    /* Réinitialisation CSS */
+    *,
+    *::before,
+    *::after {
+        @apply m-0 p-0 box-border;
+    }
+
+    /* Style global pour le body */
+    body {
+        @apply bg-background text-text;
+        @apply dark:bg-background-dark dark:text-text-dark;
+        @apply font-sans leading-normal;
+        @apply transition-colors duration-300 ease-in-out;
+    }
+
+    /* Titres */
+    h1, h2, h3, h4, h5, h6 {
+        @apply font-heading text-text dark:text-text-dark;
+    }
+
+    h1 {
+        @apply text-title-1;
+    }
+    h2 {
+        @apply text-title-2;
+    }
+    h3 {
+        @apply text-title-3;
+    }
+    h4 {
+        @apply text-subtitle-1;
+    }
+    h5 {
+        @apply text-subtitle-2;
+    }
+    h6 {
+        @apply text-subtitle-3;
+    }
+
+    /* Paragraphes */
+    p {
+        @apply text-base text-text-secondary dark:text-text-dark-secondary;
+    }
+
+    /* Liens */
+    a {
+        @apply text-secondary-100 hover:text-secondary-80 transition duration-200 ease-in-out;
+        @apply no-underline;
+    }
+
+    /* Inputs, textareas, selects */
+    input,
+    textarea,
+    select {
+        @apply bg-background-secondary text-text;
+        @apply dark:bg-background-dark-secondary dark:text-text-dark;
+        @apply border border-neutral-80 dark:border-neutral-border-dark;
+        @apply rounded-lg px-4 py-3 text-base;
+        @apply focus:ring-2 focus:ring-primary-60 focus:border-transparent outline-none;
+        @apply placeholder:text-text-secondary dark:placeholder:text-text-dark-secondary;
+        @apply transition duration-200 ease-in-out;
+    }
+
+    /* Boutons */
+    button,
+    [type="button"],
+    [type="submit"] {
+        @apply bg-primary-100 text-white;
+        @apply rounded-lg px-4 py-3 text-base font-semibold;
+        @apply hover:bg-primary-80 transition duration-300 ease-in-out;
+        @apply focus:outline-none focus:ring-2 focus:ring-primary-dark focus:ring-offset-2;
+        @apply disabled:bg-primary-40 disabled:cursor-not-allowed;
+    }
+
+    /* Labels */
+    label {
+        @apply block text-small-1 font-medium text-text dark:text-text-dark;
+    }
 }
-/*button {*/
-/*    @apply bg-primary dark:bg-primary-dark;*/
-/*}*/
-div{
-    @apply dark:bg-background-dark dark:text-text-dark;
+
+/* Composants personnalisés */
+@layer components {
+    /* Carte */
+    .card {
+        @apply bg-background-secondary dark:bg-background-dark-secondary;
+        @apply rounded-xl shadow-soft dark:shadow-dark-soft p-8;
+    }
+
+    /* Bouton secondaire */
+    .btn-secondary {
+        @apply bg-secondary-100 text-white;
+        @apply rounded-lg px-4 py-3;
+        @apply hover:bg-secondary-80 transition duration-300 ease-in-out;
+    }
+
+    /* Badge */
+    .badge {
+        @apply bg-accent-60 text-text dark:text-text-dark;
+        @apply rounded-full px-3 py-1 text-small-1;
+    }
 }
-p, h4, h5, h6, span, label{
-    @apply dark:text-text-dark;
-}
-h2, h1, h3{
-    @apply dark:text-primary-dark;
+
+/* Utilitaires */
+@layer utilities {
+    /* Scrollbar personnalisée */
+    ::-webkit-scrollbar {
+        @apply w-2;
+    }
+
+    ::-webkit-scrollbar-track {
+        @apply bg-neutral-20;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        @apply bg-primary-60 rounded-full;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        @apply bg-primary-80;
+    }
 }

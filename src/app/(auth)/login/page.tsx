@@ -1,31 +1,37 @@
 "use client";
 
 import { GiChefToque } from "react-icons/gi";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FORM_RULES } from "@/config/formRules";
 import useAuth from "@/hooks/useAuth";
-
-
+import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState<string | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const router = useRouter();
-    const { login} = useAuth();
+    const { login } = useAuth();
+    const { toast } = useToast();
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setError(null);
 
         if (!FORM_RULES.email.regex.test(email)) {
-            setError(FORM_RULES.email.errorMessage);
+            toast({
+                variant: "destructive",
+                title: "Invalid Email",
+                description: FORM_RULES.email.errorMessage,
+            });
             return;
         }
         if (!FORM_RULES.password.regex.test(password)) {
-            setError(FORM_RULES.password.errorMessage);
+            toast({
+                variant: "destructive",
+                title: "Invalid Password",
+                description: FORM_RULES.password.errorMessage,
+            });
             return;
         }
 
@@ -35,23 +41,25 @@ export default function LoginPage() {
             setIsLoggedIn(true); // Déclencher la redirection après succès
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
-            setError(errorMessage);
+            toast({
+                variant: "destructive",
+                title: "Login Failed",
+                description: errorMessage,
+            });
         }
     };
 
-    
-    const goToRegister = () =>{
+    const goToRegister = () => {
         router.push("/register");
-    }
+    };
+
     useEffect(() => {
         if (isLoggedIn) {
-            // Attendre un court délai pour garantir que le cookie est stocké
             const redirect = setTimeout(() => {
                 console.log("Redirection vers /home après délai");
                 router.push("/home");
-            }, 100); // 100ms
-
-            return () => clearTimeout(redirect); // Nettoyage
+            }, 100);
+            return () => clearTimeout(redirect);
         }
     }, [isLoggedIn, router]);
 
@@ -63,8 +71,6 @@ export default function LoginPage() {
                     Sign in to your account
                 </h2>
             </div>
-
-            {error && <p className="text-red-500 text-center mt-4">{error}</p>}
 
             <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
                 <form onSubmit={handleSubmit} className="space-y-6">

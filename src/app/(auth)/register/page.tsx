@@ -8,11 +8,11 @@ import { Button } from "@/components/ui/button";
 import { FORM_RULES } from "@/config/formRules";
 import useAuth from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 export default function RegisterPage() {
     const { register } = useAuth();
     const [image, setImage] = useState<File | null>(null);
-    const [errors, setErrors] = useState<string | null>(null);
     const [formValues, setFormValues] = useState({
         lastName: "",
         firstName: "",
@@ -31,21 +31,39 @@ export default function RegisterPage() {
         image: false,
     });
     const router = useRouter();
+    const { toast } = useToast();
 
     const isFormValid = Object.values(formValidity).every(Boolean);
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setErrors(null);
+
+        if (!isFormValid) {
+            toast({
+                variant: "destructive",
+                title: "Form Invalid",
+                description: "Please fill out all fields correctly.",
+            });
+            return;
+        }
 
         const formData = new FormData(event.currentTarget);
         if (image) formData.append("profilePic", image);
 
         try {
             await register(formData);
+            toast({
+                title: "Registration Successful",
+                description: "Redirecting to home...",
+            });
             router.push("/home");
-        } catch (errorMessage) {
-            setErrors(errorMessage as string);
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+            toast({
+                variant: "destructive",
+                title: "Registration Failed",
+                description: errorMessage,
+            });
         }
     };
 
@@ -69,7 +87,6 @@ export default function RegisterPage() {
 
     const handleCancel = () => {
         setImage(null);
-        setErrors(null);
         setFormValues({
             lastName: "",
             firstName: "",
@@ -88,19 +105,17 @@ export default function RegisterPage() {
             image: false,
         });
         const form = document.querySelector("form");
-        if (form) form.reset(); // Toujours utile pour réinitialiser les champs natifs
+        if (form) form.reset();
     };
 
     return (
         <div className="bg-amber-50 flex flex-col w-full h-[100vh] justify-center items-center">
             <div className="flex flex-col items-center justify-center">
-                <GiChefToque className="text-4xl text-primary " size={50} />
+                <GiChefToque className="text-4xl text-primary" size={50} />
                 <h2 className="mt-5 mb-10 text-center text-2xl font-bold tracking-tight text-gray-900">
                     Register to Kaly'Art
                 </h2>
             </div>
-
-            {errors && <p className="text-red-500">{errors}</p>}
 
             <form onSubmit={handleSubmit} className="flex w-full justify-center flex-wrap gap-10">
                 <div className="flex w-[350px] flex-col items-center space-y-6">

@@ -4,6 +4,7 @@ import "./globals.css";
 import ThemeProvider from "@/providers/ThemeProvider";
 import {AuthProvider} from "@/context/AuthContext";
 import WebSocketProvider from "@/providers/WebSocketProvider";
+import {Toaster} from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -24,6 +25,7 @@ export default function RootLayout({
               <WebSocketProvider>
               <div className={"flex h-[100vh] justify-center items-center w-full"}>
                   {children}
+                  <Toaster/>
               </div>
               </WebSocketProvider>
           </ThemeProvider>
