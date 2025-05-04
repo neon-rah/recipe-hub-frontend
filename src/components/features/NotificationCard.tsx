@@ -55,7 +55,7 @@ export default function NotificationCard({ notif, className }: NotificationCardP
     return (
         <div
             className={`flex items-center justify-between rounded-lg relative cursor-pointer p-2 transition-colors ${
-                notif.read ? "bg-gray-100 dark:bg-gray-800" : "bg-blue-100 dark:bg-blue-900 border-l-4 border-blue-500"
+                notif.read ? "bg-background-secondary shadow-soft bg-primary-20" : "bg-secondary-40 shadow-soft border-l-4 border-secondary-100"
             } ${className}`}
             onClick={handleClick}
         >

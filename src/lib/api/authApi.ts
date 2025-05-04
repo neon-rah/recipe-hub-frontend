@@ -1,7 +1,7 @@
 // authApi.ts
 import { LoginResponse, User, UserDTO } from "@/types/user";
 import { AxiosError } from "axios";
-import api from "@/config/api";
+import api, {setAuthToken} from "@/config/api";
 
 // Inscription
 export const register = async (formData: FormData): Promise<LoginResponse> => {
@@ -65,6 +65,7 @@ export const refreshToken = async (): Promise<string | null> => {
         const res = await api.post("/auth/refresh-token");
         const newAccessToken = res.data.accessToken;
         console.log("Nouveau accessToken reçu:", newAccessToken);
+        setAuthToken(newAccessToken);
         return newAccessToken;
     } catch (err) {
         console.error("Erreur lors du rafraîchissement du token:", err);

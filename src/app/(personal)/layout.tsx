@@ -6,6 +6,7 @@ import Navbar from "@/components/layout/NavBar";
 import useAuth from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import FloatingActionButton from "@/components/FloatingActionButton";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 
 export default function PersonalLayout({ children }: { children: ReactNode }) {
     const { user } = useAuth();
@@ -15,9 +16,10 @@ export default function PersonalLayout({ children }: { children: ReactNode }) {
 
     return (
         <ProtectedRoute>
-            <div className="flex h-screen w-full flex-col overflow-auto scrollbar-none">
+            <div className="flex bg-background dark:bg-background-dark h-screen w-full flex-col overflow-auto scrollbar-none">
                 <Navbar profileImage={profileImage} />
                 <main className="flex-1 m-0 p-4 scrollbar-none">{children}</main>
+                <ScrollToTopButton/>
                 <FloatingActionButton />
             </div>
         </ProtectedRoute>

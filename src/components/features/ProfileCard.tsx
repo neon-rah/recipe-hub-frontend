@@ -62,7 +62,7 @@ export default function ProfileCard({ user, currentUserId, isProfileOwner = true
     };
 
     return (
-        <Card className="w-full mx-auto shadow-lg rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
+        <Card className="w-full mx-auto shadow-lg border-none rounded-xl bg-white dark:bg-primary-20 text-gray-900 dark:text-white transition-colors duration-300">
             <div className="relative h-32 bg-gray-200 rounded-t-xl dark:bg-gray-800 overflow-hidden">
                 <Image
                     src="/assets/back-5.jpg"
@@ -102,8 +102,8 @@ export default function ProfileCard({ user, currentUserId, isProfileOwner = true
                     {isProfileOwner ? (
                         <Button
                             onClick={() => router.push("/publish")}
-                            variant="outline"
-                            className="w-full bg-gray-300 hover:bg-gray-200 text-gray-700 dark:text-gray-900 dark:bg-primary-dark dark:hover:bg-primary-dark/70 dark:outline-none dark:border-gray-900"
+                            variant={"default"}
+                            className="w-full bg-accent hover:bg-accent-80 dark:text-gray-700 dark:bg-accent dark:hover:bg-accent-80 dark:outline-none dark:text-white"
                         >
                             <Pencil className="w-4 h-4 mr-2" /> New Post
                         </Button>

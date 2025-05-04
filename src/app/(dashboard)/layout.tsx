@@ -8,6 +8,8 @@ import useAuth from "@/hooks/useAuth";
 
 
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
+import FloatingActionButton from "@/components/FloatingActionButton";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
     const {user} = useAuth();
@@ -26,16 +28,19 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 <main className="flex flex-1 justify-center p-4 gap-4 overflow-hidden scrollbar-none ">
                     {/* Contenu principal (2/3 de l'écran) */}
                     <section
-                        className="flex-1 bg-white  overflow-auto scrollbar-none shadow-sm  rounded-lg dark:bg-gray-900">
+                        className="flex-1 bg-background-secondary overflow-auto scrollbar-none shadow-sm  rounded-lg dark:bg-background-dark pb-10">
                         {children}
                     </section>
 
                     {/* Sidebar (Partie droite) - Cachée sur mobile */}
                     <aside
-                        className="w-1/3 h-screen bg-gray-100 shadow-sm shadow-gray-400 overflow-auto scrollbar-none rounded-lg dark:bg-gray-800 hidden lg:block">
+                        className="w-1/3 pb-10 bg-gray-100 shadow-sm shadow-gray-400 overflow-auto scrollbar-none rounded-lg dark:bg-background-dark hidden lg:block">
                         <SideBar/>
                     </aside>
                 </main>
+
+                <ScrollToTopButton/>
+                <FloatingActionButton />
             </div>
 
         {/*</RecipeSyncProvider>*/}

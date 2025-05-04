@@ -18,8 +18,7 @@ export default function FollowPage() {
     const {
         users,
         loading,
-        error,
-        
+        error,        
         setFilter,
         searchQuery,
         setSearchQuery,
@@ -59,7 +58,7 @@ export default function FollowPage() {
                             value={searchQuery}
                             setValue={setSearchQuery}
                             onSearch={handleSearch}
-                            onCancel={resetSearch} // Réinitialiser avec "X"
+                            onCancel={resetSearch}
                         />
                     }
                 />
@@ -70,7 +69,7 @@ export default function FollowPage() {
                                 variant={activeFilter === "suggestions" ? "default" : "outline"}
                                 className={cn(
                                     "rounded-full cursor-pointer px-4 py-1 whitespace-nowrap",
-                                    activeFilter === "suggestions" ? "bg-blue-500 text-white" : "bg-gray-200 dark:bg-gray-700"
+                                    activeFilter === "suggestions" ? "bg-accent dark:bg-accent-dark text-white" : "bg-primary-100 dark:bg-primary-dark text-white"
                                 )}
                                 onClick={() => toggleFilter("suggestions")}
                             >
@@ -80,7 +79,7 @@ export default function FollowPage() {
                                 variant={activeFilter === "following" ? "default" : "outline"}
                                 className={cn(
                                     "rounded-full cursor-pointer px-4 py-1 whitespace-nowrap",
-                                    activeFilter === "following" ? "bg-blue-500 text-white" : "bg-gray-200 dark:bg-gray-700"
+                                    activeFilter === "following" ? "bg-accent dark:bg-accent-dark text-white" : "bg-primary-100 dark:bg-primary-dark text-white"
                                 )}
                                 onClick={() => toggleFilter("following")}
                             >

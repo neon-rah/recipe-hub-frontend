@@ -47,7 +47,7 @@
     }
 
     /* Paragraphes */
-    p {
+    p, li {
         @apply text-base text-text-secondary dark:text-text-dark-secondary;
     }
 

@@ -27,14 +27,21 @@ const config: Config = {
                 },
                 // Couleur secondaire : Navy
                 secondary: {
-                    DEFAULT: "#1E3A5F",      // Bleu foncé
-                    dark: "#152A47",         // Variante sombre
-                    100: "#1E3A5F",          // 100% opacité
-                    80: "#1E3A5Fcc",         // 80% opacité (hover)
-                    60: "#1E3A5F99",         // 60% opacité (focus/subtil)
-                    40: "#1E3A5F66",         // 40% opacité (disabled)
-                    20: "#1E3A5F33",         // 20% opacité (fond léger)
-                    10: "#1E3A5F1a",         // 10% opacité (effet subtil)
+                    DEFAULT: "#1E3A5F",
+                    dark: "#152A47",
+                    "dark-mode": "#7DA1C4",  // New lighter blue for dark mode
+                    100: "#1E3A5F",
+                    80: "#1E3A5Fcc",
+                    60: "#1E3A5F99",
+                    40: "#1E3A5F66",
+                    20: "#1E3A5F33",
+                    10: "#1E3A5F1a",
+                    "dark-mode-100": "#7DA1C4",  // 100% opacity for dark mode
+                    "dark-mode-80": "#7DA1C4cc", // 80% opacity (hover)
+                    "dark-mode-60": "#7DA1C499", // 60% opacity (focus/subtil)
+                    "dark-mode-40": "#7DA1C466", // 40% opacity (disabled)
+                    "dark-mode-20": "#7DA1C433", // 20% opacity (fond léger)
+                    "dark-mode-10": "#7DA1C41a", // 10% opacity (effet subtil)
                 },
                 // Fond
                 background: {
@@ -42,6 +49,7 @@ const config: Config = {
                     secondary: "#FEFBF7",    // Crème blanc (cartes/popups, mode clair)
                     dark: "#2A2522",         // Gris café foncé (mode sombre)
                     "dark-secondary": "#3B3331", // Gris brun (cartes/popups, mode sombre)
+                    "dark-tertiary": "#2A2223",
                 },
                 // Texte
                 text: {

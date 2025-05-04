@@ -75,10 +75,10 @@ export default function ProfilePage({ params }: ProfilePageProps) {
         : recipes;
 
     return (
-        <div className={`flex flex-wrap gap-6 w-full m-0 bg-white md:px-7 lg:px-5 scrollbar-none ${isSingleColumn ? "h-[calc(100vh-60px)] overflow-y-auto" : ""}`}>
-            <aside className={`m-0 py-6 flex flex-col md:w-1/2 lg:w-1/3 space-y-4 pb-28 scrollbar-none ${isSingleColumn ? "w-full pb-10 px-5" : "h-[calc(100vh-60px)] overflow-y-auto sticky"}`}>
+        <div className={`flex bg-background dark:bg-background-dark flex-wrap gap-6 w-full m-0 bg-white md:px-7 lg:px-5 scrollbar-none ${isSingleColumn ? "h-[calc(100vh-60px)] overflow-y-auto" : ""}`}>
+            <aside className={`m-0 py-6 bg-background shadow-soft dark:bg-background-dark flex flex-col md:w-1/2 lg:w-1/3 space-y-4 pb-28 scrollbar-none ${isSingleColumn ? "w-full pb-10 px-5" : "h-[calc(100vh-60px)] overflow-y-auto sticky"}`}>
                 <ProfileCard user={isOwnProfile ? user : profileUser} currentUserId={currentUserId} isProfileOwner={isOwnProfile} isFollowing={isFollowingProfile} />
-                <div className="dark:bg-gray-900 p-4 rounded-lg shadow-md flex flex-col">
+                <div className="p-4 rounded-lg shadow-md flex flex-col">
                     <h3 className="text-lg font-semibold mb-3">Followers ({followers.length})</h3>
                     <div className="space-y-3">
                         {followers.slice(0, visibleFollowers).map((follower) => (
@@ -91,7 +91,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                     </div>
                 </div>
                 {isOwnProfile && (
-                    <div className="dark:bg-gray-900 p-4 rounded-lg shadow-md flex flex-col">
+                    <div className="bg-background dark:bg-background-dark p-4 rounded-lg shadow-md flex flex-col">
                         <h3 className="text-lg font-semibold mb-3">Following ({following.length})</h3>
                         <div className="space-y-3">
                             {following.slice(0, visibleFollowing).map((followed) => (
@@ -105,8 +105,8 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                     </div>
                 )}
             </aside>
-            <main className={`flex-1 md:w-1/2 py-6 lg:w-2/3 space-y-6 pb-28 scrollbar-none flex flex-col items-center ${isSingleColumn ? "px-5 pb-18" : "h-[calc(100vh-60px)] overflow-y-auto"}`}>
-                <SubHeader icon={<FaBookmark size={20} />} name={isOwnProfile ? "Vos recettes" : "Recettes publiées"} sticky={isSingleColumn} />
+            <main className={`flex-1  bg-background shadow-soft dark:bg-background-dark md:w-1/2 py-6 lg:w-2/3 space-y-6 pb-28 scrollbar-none flex flex-col items-center ${isSingleColumn ? "px-5 pb-18" : "h-[calc(100vh-60px)] overflow-y-auto"}`}>
+                <SubHeader icon={<FaBookmark size={20} />} name={isOwnProfile ? "Your Post" : "Post"} sticky={isSingleColumn} />
                 <div className="flex flex-col gap-5 w-full max-w-[700px]">
                     {sortedRecipes.map((recipe: Recipe) => (
                         <RecipeDetailCard key={recipe.id} recipe={recipe} />

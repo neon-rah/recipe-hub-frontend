@@ -45,7 +45,7 @@ function SavedRecipesPageContent() {
                     variant={activeCategory === "All" ? "default" : "outline"}
                     className={cn(
                         "rounded-full cursor-pointer px-4 py-1 whitespace-nowrap",
-                        activeCategory === "All" ? "bg-blue-500 text-white" : "bg-gray-200 dark:bg-gray-700"
+                        activeCategory === "All" ? "bg-accent dark:bg-accent-dark text-white" : "bg-primary-100 dark:bg-primary-dark text-white"
                     )}
                     onClick={() => setCategory("All")}
                 >
@@ -57,7 +57,7 @@ function SavedRecipesPageContent() {
                         variant={activeCategory === category ? "default" : "outline"}
                         className={cn(
                             "rounded-full cursor-pointer px-4 py-1 whitespace-nowrap",
-                            activeCategory === category ? "bg-blue-500 text-white" : "bg-gray-200 dark:bg-gray-700"
+                            activeCategory === category ?  "bg-accent dark:bg-accent-dark text-white" : "bg-primary-100 dark:bg-primary-dark text-white"
                         )}
                         onClick={() => setCategory(category)}
                     >
@@ -66,7 +66,7 @@ function SavedRecipesPageContent() {
                 ))}
             </div>
             <div className="flex flex-1 justify-center gap-4 overflow-hidden scrollbar-none">
-                <section className="flex-1 bg-white overflow-auto scrollbar-none shadow-sm rounded-lg dark:bg-gray-900">
+                <section className="flex-1 bg-white overflow-auto scrollbar-none shadow-sm rounded-lg dark:bg-background-dark">
                     <RecipeList onSelectRecipe={setSelectedRecipeLocal} recipesOverride={savedRecipes} loadingOverride={loading} errorOverride={error} />
                 </section>
                 <aside className="overflow-auto">

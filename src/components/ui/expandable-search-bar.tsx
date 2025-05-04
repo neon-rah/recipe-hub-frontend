@@ -1,4 +1,3 @@
-// /app/components/ui/expandable-search-bar.tsx
 "use client";
 
 import { useState } from "react";
@@ -50,15 +49,15 @@ export default function ExpandableSearchBar({
     console.log("[ExpandableSearchBar] Rendered with value:", value, "isExpanded:", isExpanded);
 
     return (
-        <div className={`flex items-center m-0 gap-1 overflow-hidden ${className}`}>
+        <div className={`flex items-center m-0 gap-2 overflow-hidden ${className}`}>
             {!isExpanded ? (
                 <Button
                     variant="secondary"
                     size="icon"
                     onClick={() => {
-                        console.log("[ExpandableSearchBar] Expand button clicked");
                         setIsExpanded(true);
                     }}
+                    className={"p-0 m-0 "}
                 >
                     <BiSearch className="w-5 h-5" />
                 </Button>
@@ -91,16 +90,16 @@ export default function ExpandableSearchBar({
                     )}
                     <Button
                         variant="default"
-                        className={"rounded-full w-6 h-6 bg-red-500 hover:bg-red-600"}
+                        className="rounded-full w-8 h-8 bg-alert dark:bg-alert-dark hover:bg-alert-dark dark:hover:bg-alert-dark"
                         size="icon"
                         onClick={() => {
                             console.log("[ExpandableSearchBar] Clear button clicked");
                             setValue("");
                             setIsExpanded(false);
-                            onCancel(); // Appelle onCancel pour réinitialiser
+                            onCancel();
                         }}
                     >
-                        <BiX className="text-white hover:text-red-500" />
+                        <BiX className="text-white w-5 h-5" />
                     </Button>
                 </>
             )}

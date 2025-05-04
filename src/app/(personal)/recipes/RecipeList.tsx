@@ -90,7 +90,7 @@ export default function RecipeList({ onSelectRecipe, recipesOverride, loadingOve
     }
 
     return (
-        <div className="p-4 w-full h-full flex flex-col pb-24">
+        <div className="p-4 bg-background dark:bg-background-dark w-full h-full flex flex-col pb-24">
             <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {recipes.map((recipe) => (
                     <RecipeCard key={recipe.id} recipe={recipe} onClick={() => onSelectRecipe(recipe)} />
@@ -106,6 +106,7 @@ export default function RecipeList({ onSelectRecipe, recipesOverride, loadingOve
                             console.log("[RecipeList] Page changed to:", page);
                             setPage(page);
                         }}
+                        
                     />
                 </div>
             )}

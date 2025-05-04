@@ -23,7 +23,7 @@ export default function RootLayout({
       <AuthProvider>
           <ThemeProvider>
               <WebSocketProvider>
-              <div className={"flex h-[100vh] justify-center items-center w-full"}>
+              <div className={"flex bg-background dark:bg-background-dark h-[100vh] justify-center items-center w-full"}>
                   {children}
                   <Toaster/>
               </div>

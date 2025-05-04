@@ -45,8 +45,8 @@ export default function FriendCard({ user, isFollowing, onFollow, onUnfollow, cu
     const isCurrentUser = currentUserId === user.idUser;
 
     return (
-        <Card className={`flex items-center w-full gap-5 justify-between px-3 py-1 rounded-lg shadow-md bg-white dark:bg-gray-900 transition-colors duration-300 ${className}`}>
-            <div className="flex items-center gap-2 dark:bg-gray-900">
+        <Card className={`flex items-center w-full gap-5 justify-between px-3 py-1 rounded-lg shadow-md bg-background-secondary dark:bg-primary-20 dark:border-none transition-colors duration-300 ${className}`}>
+            <div className="flex items-center gap-2">
                 <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-300 dark:bg-gray-900 dark:border-gray-900">
                     <Image
                         src={user.profileUrl || "/assets/profile-1.png"}
@@ -58,7 +58,7 @@ export default function FriendCard({ user, isFollowing, onFollow, onUnfollow, cu
                 </div>
                 <div>
                     <h3
-                        className="text-sm font-medium text-gray-900 dark:text-white cursor-pointer hover:underline"
+                        className="text-sm text-wrap font-medium text-gray-900 dark:text-white cursor-pointer hover:underline"
                         onClick={handleNameClick}
                     >
                         {user.userName || "Unknown"}
@@ -69,12 +69,12 @@ export default function FriendCard({ user, isFollowing, onFollow, onUnfollow, cu
                 </div>
             </div>
             {!isCurrentUser && ( // Masquer les boutons si c’est l’utilisateur connecté
-                <Button
-                    className={`flex items-center gap-1 px-3 py-1 ${isFollowing ? "bg-red-500" : "border-gray-400 dark:bg-primary-dark dark:text-gray-900 text-gray-700"}`}
+                <Button                    
+                    className={`flex w-9 h-9 text-white text-small-2 items-center ${isFollowing ? "bg-alert dark:bg-alert-dark dark:hover:bg-alert" : "bg-primary dark:bg-primary-dark"}`}
                     onClick={isFollowing ? handleUnfollowClick : handleFollowClick}
                 >
                     {isFollowing ? <UserMinus className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
-                    {isFollowing ? "Unfollow" : "Follow"}
+                    {/*{isFollowing ? "Unfollow" : "Follow"}*/}
                 </Button>
             )}
         </Card>

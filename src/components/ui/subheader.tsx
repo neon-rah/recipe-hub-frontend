@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { BiUser } from "react-icons/bi"; // Icône par défaut, modifiable
+import { BiUser } from "react-icons/bi";
 
 interface SubHeaderProps {
     name: string;
@@ -15,18 +15,18 @@ interface SubHeaderProps {
 
 const sizeVariants = {
     padding: {
-        md: "px-6 py-4",
+        md: "px-4 py-3",
         lg: "px-6 py-4",
     },
     text: {
-        md: "text-lead text-black-80 max-md:text-base",
+        md: "text-lead",
         lg: "text-subtitle-3",
     },
 };
 
 export function SubHeader({
                               name,
-                              icon = <BiUser className="text-icon" />, // Icône par défaut
+                              icon = <BiUser className="text-icon" />,
                               sticky = false,
                               size = "md",
                               rightContent = null,
@@ -35,19 +35,20 @@ export function SubHeader({
     return (
         <div
             className={cn(
-                "flex py-3 px-3 select-none gap-10 max-md:gap-2 w-full justify-between items-center z-30 rounded-sm shadow-sm shadow-gray-700  bg-white dark:shadow-gray-800  dark:border-neutral-800 dark:bg-secondary-d dark:backdrop-blur-sm",
+                "flex select-none gap-6 max-md:gap-3 w-full justify-between items-center z-30 rounded-md shadow-soft dark:shadow-dark-soft bg-background dark:bg-background-dark",
+                sizeVariants.padding[size],
                 sticky && "sticky top-0"
             )}
         >
             {!hideLeftContent && (
                 <div
                     className={cn(
-                        "flex items-center gap-2 text-primary-dark font-bold text-nowrap dark:text-white",
+                        "flex items-center gap-2 text-text dark:text-text-dark font-bold text-nowrap",
                         sizeVariants.text[size]
                     )}
                 >
-                    {icon} {/* Affiche une icône React au lieu d'une className */}
-                    <span className="text-primary dark:text-primary-dark">{name}</span>
+                    {icon}
+                    <span className="text-primary-100 dark:text-accent">{name}</span>
                 </div>
             )}
             {rightContent && <div className="w-full flex justify-end">{rightContent}</div>}

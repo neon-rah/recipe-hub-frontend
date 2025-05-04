@@ -19,7 +19,7 @@ export default function ThemeSwitcher() {
             className="p-2 rounded-full bg-primary dark:bg-secondary transition-transform transform hover:scale-110"
         >
             {theme === "light" ? (
-                <FaMoon className="text-black dark:text-white" size={20} />
+                <FaMoon className="text-neutral dark:text-white" size={20} />
             ) : (
                 <FaSun className="text-white dark:text-yellow-400" size={20} />
             )}

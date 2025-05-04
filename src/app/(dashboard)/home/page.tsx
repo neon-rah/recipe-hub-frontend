@@ -76,9 +76,9 @@ export default function HomePage() {
     }
 
     return (
-        <div className="flex flex-col gap-4 p-6">
+        <div className="bg-background flex flex-col gap-4 p-6 dark:bg-background-dark">
             <SubHeader name={"Home"} icon={<FaHome size={20} />} sticky={true} />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {recipes.slice(0, 18).map((recipe) => (
                     <RecipeCard
                         key={recipe.id}
@@ -89,7 +89,7 @@ export default function HomePage() {
             </div>
             <div className="mt-6 text-center">
                 <Link href="/recipes" className="text-blue-500 hover:underline font-semibold">
-                    Find More Recipes here
+                    Find More Recipes here -{">"}
                 </Link>
             </div>
         </div>

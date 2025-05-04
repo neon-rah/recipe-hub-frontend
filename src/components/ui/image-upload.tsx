@@ -102,7 +102,7 @@ export default function ImageUpload({
 
             {error && <p className="text-sm text-red-500">{error}</p>}
             {required && !imagePreview && !error && (
-                <p className="text-sm text-red-500">Image is required</p>
+                <p className="text-sm text-red-500 dark:text-red-500">Image is required</p>
             )}
         </div>
     );

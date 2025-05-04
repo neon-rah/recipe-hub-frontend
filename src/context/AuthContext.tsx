@@ -1,10 +1,9 @@
 "use client";
 
 import React, { createContext, useState, useEffect, ReactNode } from "react";
-
 import api, { setAuthToken, getAuthToken } from "@/config/api";
 import { login, logout, register, verifyRefreshToken, refreshToken } from "@/lib/api/authApi";
-import {User} from "@/types/user";
+import { User } from "@/types/user";
 
 interface AuthContextType {
     user: User | null;
@@ -30,14 +29,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 console.log("restoreAuth - AccessToken initial:", currentAccessToken);
                 if (currentAccessToken) {
                     try {
-                        const res = await api.get("/user/profile",
-                            {
-                                headers: {
-                                    "Authorization": `Bearer ${currentAccessToken}`,
-                                    "Content-Type": "application/json"
-                                }
-                            }
-                            );
+                        const res = await api.get("/user/profile", {
+                            headers: {
+                                "Authorization": `Bearer ${currentAccessToken}`,
+                                "Content-Type": "application/json",
+                            },
+                        });
                         setUser(new User(res.data));
                         console.log("AuthProvider - État restauré avec accessToken existant, user:", res.data);
                     } catch (err) {
@@ -48,14 +45,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                             const newAccessToken = await refreshToken();
                             if (newAccessToken) {
                                 setAuthToken(newAccessToken);
-                                const res = await api.get("/user/profile",
-                                    {
-                                        headers: {
-                                            "Authorization": `Bearer ${newAccessToken}`,
-                                            "Content-Type": "application/json"
-                                        }
-                                    }
-                                    );
+                                const res = await api.get("/user/profile", {
+                                    headers: {
+                                        "Authorization": `Bearer ${newAccessToken}`,
+                                        "Content-Type": "application/json",
+                                    },
+                                });
                                 setUser(new User(res.data));
                                 console.log("AuthProvider - État restauré avec refreshToken, user:", res.data);
                             } else {
@@ -73,14 +68,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                         const newAccessToken = await refreshToken();
                         if (newAccessToken) {
                             setAuthToken(newAccessToken);
-                            const res = await api.get("/user/profile",
-                                {
-                                    headers: {
-                                        "Authorization": `Bearer ${newAccessToken}`,
-                                        "Content-Type": "application/json"
-                                    }
-                                }
-                                );
+                            const res = await api.get("/user/profile", {
+                                headers: {
+                                    "Authorization": `Bearer ${newAccessToken}`,
+                                    "Content-Type": "application/json",
+                                },
+                            });
                             setUser(new User(res.data));
                             console.log("AuthProvider - État restauré avec refreshToken, user:", res.data);
                         } else {
@@ -88,20 +81,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                         }
                     } else {
                         console.log("restoreAuth - Aucun token valide");
-                        // logoutHandler();
                     }
                 }
             } catch (err) {
                 console.error("restoreAuth - Erreur lors de la restauration:", err);
                 setError("Erreur lors de la vérification initiale");
-                // logoutHandler();
             } finally {
                 setLoading(false);
             }
         };
 
+        // Appeler la restauration initiale
         restoreAuth();
-    }, []);
+
+        // Rafraîchissement proactif toutes les 14 minutes (840000 ms)
+        const refreshInterval = setInterval(async () => {
+            const currentToken = getAuthToken();
+            if (currentToken && user) { // Vérifier qu'il y a un utilisateur authentifié
+                try {
+                    console.log("Rafraîchissement proactif - Début");
+                    const isValid = await verifyRefreshToken(null);
+                    if (isValid) {
+                        const newAccessToken = await refreshToken();
+                        if (newAccessToken) {
+                            setAuthToken(newAccessToken);
+                            console.log("Rafraîchissement proactif - Nouveau token:", newAccessToken);
+                        } else {
+                            throw new Error("Échec du rafraîchissement du token");
+                        }
+                    } else {
+                        console.log("Rafraîchissement proactif - Refresh token invalide, déconnexion");
+                        logoutHandler();
+                    }
+                } catch (err) {
+                    console.error("Rafraîchissement proactif - Erreur:", err);
+                    logoutHandler();
+                }
+            }
+        }, 14 * 60 * 1000); // 14 minutes
+
+        // Nettoyer l'intervalle lors du démontage
+        return () => clearInterval(refreshInterval);
+    }, []); // Dépendance vide car c'est une initialisation unique
 
     const loginHandler = async (email: string, password: string) => {
         setLoading(true);
@@ -140,12 +161,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setAuthToken(null);
         logout();
         console.log("AuthProvider - Déconnexion effectuée");
-    };    
+    };
 
     return (
         <AuthContext.Provider
             value={{
-                user,                
+                user,
                 isAuthenticated: !!user,
                 login: loginHandler,
                 register: registerHandler,

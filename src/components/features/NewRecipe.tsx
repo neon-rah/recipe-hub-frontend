@@ -99,7 +99,7 @@ export default function NewRecipe({ onSubmit, initialId }: NewRecipeProps) {
     };
 
     return (
-        <div className="shadow-gray-700 w-full dark:bg-background-dark/80 p-6 rounded-lg shadow-lg max-w-3xl mx-auto">
+        <div className="shadow-dark-soft w-full dark:bg-background-dark/80 p-6 rounded-lg shadow-lg max-w-3xl mx-auto">
             <h2 className="text-2xl font-semibold text-primary mb-4">{initialId ? "Edit Recipe" : "New Recipe"}</h2>
             <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
                 <div className="flex flex-wrap gap-6">
@@ -141,7 +141,7 @@ export default function NewRecipe({ onSubmit, initialId }: NewRecipeProps) {
                                             variant="destructive"
                                             size="icon"
                                             onClick={() => handleRemoveIngredient(index)}
-                                            className="bg-red-400 hover:bg-red-300 dark:bg-primary-dark"
+                                            className="bg-alert hover:bg-alert/80"
                                         >
                                             <TrashIcon className="w-4 h-4" />
                                         </Button>
@@ -152,9 +152,9 @@ export default function NewRecipe({ onSubmit, initialId }: NewRecipeProps) {
                             <Button
                                 type="button"
                                 onClick={handleAddIngredient}
-                                className="bg-secondary hover:bg-gray-400 dark:bg-secondary-dark dark:hover:bg-gray-400 text-white"
+                                className="bg-secondary text-small-1 py-1 hover:bg-secondary/80 dark:bg-secondary-dark dark:hover:bg-secondary-dark/80 text-white"
                             >
-                                <PlusIcon className="w-4 h-4 mr-2" /> Add Ingredient
+                                <PlusIcon className="w-4 h-4 mr-2" /> <p className={"text-small-2 text-white"}>Add Ingredient</p>
                             </Button>
                         </div>
 
@@ -184,9 +184,9 @@ export default function NewRecipe({ onSubmit, initialId }: NewRecipeProps) {
                             <Button
                                 type="button"
                                 onClick={handleAddPreparationStep}
-                                className="bg-secondary hover:bg-gray-400 dark:bg-secondary-dark dark:hover:bg-gray-400 text-white"
+                                className="bg-secondary text-small-1 hover:bg-secondary/80 dark:bg-secondary-dark dark:hover:bg-secondary-dark/80 text-white"
                             >
-                                <PlusIcon className="w-4 h-4 mr-2" /> Add Step
+                                <PlusIcon className="w-4 h-4 mr-2"/> <p className={"text-small-2 text-white"}>Add Step</p>
                             </Button>
                         </div>
                     </div>
@@ -198,7 +198,7 @@ export default function NewRecipe({ onSubmit, initialId }: NewRecipeProps) {
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select category" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-gray-100 dark:bg-black/90">
+                                <SelectContent className="bg-gray-100 dark:bg-background-dark/90">
                                     {CATEGORIES.map((c) => (
                                         <SelectItem className="hover:bg-gray-600" key={c} value={c}>
                                             {c}

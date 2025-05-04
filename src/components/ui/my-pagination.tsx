@@ -69,8 +69,9 @@ const PaginationLink = ({
             buttonVariants({
                 variant: isActive ? "outline" : "ghost",
                 size: "icon",
-            }),
+            }),            
             "px-3 py-2 rounded",
+            isActive ? "bg-primary text-white" : "",
             className
         )}
         {...props}
@@ -82,12 +83,12 @@ const PaginationPrevious = ({ onClick, disabled }: { onClick: () => void; disabl
         onClick={onClick}
         disabled={disabled}
         className={cn(
-            "flex items-center gap-1 px-3 py-2 rounded bg-gray-100 dark:bg-gray-800",
+            "flex items-center gap-1 px-2 py-1 rounded bg-accent dark:bg-accent-dark",
             disabled && "opacity-50 cursor-not-allowed"
         )}
     >
         <ChevronLeft className="h-4 w-4" />
-        <span>Précédent</span>
+        <span>Previous</span>
     </button>
 );
 
@@ -96,11 +97,11 @@ const PaginationNext = ({ onClick, disabled }: { onClick: () => void; disabled: 
         onClick={onClick}
         disabled={disabled}
         className={cn(
-            "flex items-center gap-1 px-3 py-2 rounded bg-gray-100 dark:bg-gray-800",
+            "flex items-center gap-1 px-2 py-1 rounded bg-accent dark:bg-accent-dark",
             disabled && "opacity-50 cursor-not-allowed"
         )}
     >
-        <span>Suivant</span>
+        <span>Next</span>
         <ChevronRight className="h-4 w-4" />
     </button>
 );

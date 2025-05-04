@@ -45,9 +45,9 @@ export default function SideBar() {
     };
 
     return (
-        <div className="flex bg-gray-50 p-5 shadow-xl shadow-gray-200 items-center flex-col gap-5">
+        <div className=" bg-background-secondary dark:bg-background-dark overflow-y-auto flex p-5  items-center flex-col gap-5">
             <div className="flex w-full flex-col gap-5">
-                <h1 className="text-primary text-xl font-bold">Recipe of the Day</h1>
+                <h1 className="text-primary text-xl font-bold">Recipe Suggestion</h1>
                 {recipeOfTheDay && <RecipeCard recipe={recipeOfTheDay} />}
             </div>
             <div className="flex w-full flex-col gap-5">

@@ -28,17 +28,15 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         ref
     ) => {
         const [internalValue, setInternalValue] = useState("");
-        const [isValid, setIsValid] = useState<boolean | null>(null); // null si pas encore validé
+        const [isValid, setIsValid] = useState<boolean | null>(null);
         const [isTouched, setIsTouched] = useState(false);
         const [showPassword, setShowPassword] = useState(false);
 
-        // Utiliser la valeur contrôlée si fournie, sinon l’état interne
         const value = controlledValue !== undefined ? controlledValue : internalValue;
 
         const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             const val = e.target.value;
 
-            // Mettre à jour la valeur
             if (controlledOnChange) {
                 controlledOnChange(e);
             } else {
@@ -46,13 +44,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             }
             setIsTouched(true);
 
-            // Validation
             let valid: boolean | null = null;
             if (regex) {
                 valid = regex instanceof RegExp ? regex.test(val) : regex(val);
                 setIsValid(valid);
             } else {
-                // Si pas de regex, considérer comme valide dès qu’il y a une valeur
                 valid = val.length > 0;
                 setIsValid(valid);
             }
@@ -60,17 +56,18 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             onValidationChange?.(valid ?? true, val);
         };
 
-        // Déterminer les classes de bordure en fonction de l’état
         const getBorderClass = () => {
-            if (!isTouched) return "border-gray-300"; // État initial
-            if (isValid === null) return "border-gray-300"; // Pas de validation encore
-            return isValid ? "border-green-500 focus:ring-green-500" : "border-red-500 focus:ring-red-500";
+            if (!isTouched) return "border-neutral-80 dark:border-neutral-border-dark";
+            if (isValid === null) return "border-neutral-80 dark:border-neutral-border-dark";
+            return isValid
+                ? "border-tertiary dark:border-tertiary-dark focus:ring-tertiary-60 dark:focus:ring-tertiary-dark"
+                : "border-red-400 dark:border-red-400 focus:ring-alert-60 dark:focus:ring-alert-dark";
         };
 
         return (
             <div className="w-full relative">
                 {label && (
-                    <label className="block pl-1 text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">
+                    <label className="block pl-1 text-sm font-semibold mb-1 text-text dark:text-text-dark">
                         {label}
                     </label>
                 )}
@@ -80,8 +77,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                         type={type === "password" ? (showPassword ? "text" : "password") : type}
                         value={value}
                         className={cn(
-                            "flex h-11 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 pr-10",
-                            getBorderClass(), // Appliquer les classes dynamiquement
+                            "flex h-11 w-full rounded-md border px-4 py-3 text-base shadow-soft dark:shadow-dark-soft transition-colors focus:outline-none focus:ring-2",
+                            getBorderClass(),
+                            "bg-background dark:bg-background-dark text-text dark:text-text-dark placeholder:text-text-secondary dark:placeholder:text-text-dark-secondary",
                             className
                         )}
                         ref={ref}
@@ -89,22 +87,22 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                         {...props}
                     />
                     {/* Bouton pour montrer/masquer le mot de passe (désactivé pour l’instant)
-                    {type === "password" && (
-                        <button
-                            type="button"
-                            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
-                            onClick={() => setShowPassword(!showPassword)}
-                        >
-                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                        </button>
-                    )}
-                    */}
+          {type === "password" && (
+            <button
+              type="button"
+              className="absolute inset-y-0 right-3 flex items-center text-neutral-100 dark:text-neutral-dark hover:text-neutral-80 dark:hover:text-neutral-border-dark"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          )}
+          */}
                 </div>
                 {isTouched && requirementMessage && (
-                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{requirementMessage}</p>
+                    <p className="mt-1 text-sm text-neutral-100 dark:text-neutral-dark">{requirementMessage}</p>
                 )}
                 {isTouched && isValid === false && errorMessage && (
-                    <p className="mt-1 text-sm text-red-600 dark:text-red-500">{errorMessage}</p>
+                    <p className="mt-1 text-sm text-red-500 dark:text-red-500">{errorMessage}</p>
                 )}
             </div>
         );

@@ -1,4 +1,3 @@
-// /app/components/ui/searchbar.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -58,17 +57,17 @@ export default function SearchBar({
 
     return (
         <div
-            className={`flex items-center border border-primary rounded-${radius} overflow-hidden bg-black-10 dark:bg-black-90 
-        ${block ? "w-full" : "max-w-md"} ${className}`}
+            className={`flex items-center border border-neutral-80 dark:border-neutral-border-dark rounded-${radius} overflow-hidden bg-background dark:bg-background-dark shadow-soft dark:shadow-dark-soft ${
+                block ? "w-full" : "max-w-md"
+            } ${className}`}
         >
             <Button
                 variant={variant}
                 size="icon"
-                onClick={() => {
-                    console.log("[SearchBar] Search button clicked");
+                onClick={() => {                    
                     handleSearch();
                 }}
-                className="text-primary hover:text-primary-dark"
+                className="text-primary-100 dark:text-primary-dark dark:text-accent hover:text-primary-80 dark:hover:text-primary-dark"
             >
                 <BiSearch className="w-5 h-5" />
             </Button>
@@ -89,19 +88,18 @@ export default function SearchBar({
                         handleSearch();
                     }
                 }}
-                className="flex-1 border-none bg-transparent text-black-80 placeholder:text-black-60 dark:text-white-80 dark:placeholder:text-white-60 focus:outline-none h-[30px] m-0 p-0 ring-0 focus:ring-0"
+                className="flex-1 border-none bg-transparent text-text dark:text-text-dark placeholder:text-text-secondary dark:placeholder:text-text-dark-secondary focus:outline-none h-11 m-0 p-0 ring-0 focus:ring-0"
             />
             {query && (
                 <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => {
-                        console.log("[SearchBar] Clear button clicked");
+                    onClick={() => {                        
                         setQuery("");
                         setValue("");
                         onSearch("");
                     }}
-                    className="text-gray-500 hover:text-red-500"
+                    className="text-neutral-dark dark:text-neutral-dark hover:text-alert dark:text-neutral dark:hover:text-alert-dark"
                 >
                     <BiX className="w-5 h-5" />
                 </Button>

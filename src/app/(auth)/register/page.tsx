@@ -109,22 +109,28 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="bg-amber-50 flex flex-col w-full h-[100vh] justify-center items-center">
-            <div className="flex flex-col items-center justify-center">
-                <GiChefToque className="text-4xl text-primary" size={50} />
-                <h2 className="mt-5 mb-10 text-center text-2xl font-bold tracking-tight text-gray-900">
-                    Register to Kaly'Art
-                </h2>
-            </div>
-
+        <div
+            className="flex flex-col w-full min-h-screen justify-center items-center px-4 py-6 sm:px-6 sm:py-12 overflow-y-auto">
+            <>
+                <div className="flex flex-col items-center justify-center max-w-lg mx-auto">
+                    <GiChefToque className="text-primary-100" size={50}/>
+                    <h2 className="mt-5 mb-10 text-center text-2xl font-bold tracking-tight text-text dark:text-text-dark">
+                        Register to Kaly&#39;Art
+                    </h2>
+                </div>
+            </>
             <form onSubmit={handleSubmit} className="flex w-full justify-center flex-wrap gap-10">
                 <div className="flex w-[350px] flex-col items-center space-y-6">
+
                     <ImageUpload
                         onImageSelect={handleImageSelect}
                         shape="round"
                         required={true}
+                        className="border border-neutral-80 dark:border-neutral-border-dark"
                     />
-                    {image && <p className="text-sm text-gray-500">Selected file: {image.name}</p>}
+                    {image &&
+                        <p className="text-sm text-neutral-100 dark:text-neutral-dark">Selected
+                            file: {image.name}</p>}
                     <Input
                         label="Last Name"
                         regex={FORM_RULES.lastName.regex}
@@ -132,6 +138,7 @@ export default function RegisterPage() {
                         name="lastName"
                         value={formValues.lastName}
                         onValidationChange={handleValidationChange("lastName")}
+
                     />
                     <Input
                         label="First Name"
@@ -140,6 +147,7 @@ export default function RegisterPage() {
                         name="firstName"
                         value={formValues.firstName}
                         onValidationChange={handleValidationChange("firstName")}
+
                     />
                 </div>
 
@@ -151,6 +159,7 @@ export default function RegisterPage() {
                         name="address"
                         value={formValues.address}
                         onValidationChange={handleValidationChange("address")}
+
                     />
                     <Input
                         label="Email"
@@ -159,6 +168,7 @@ export default function RegisterPage() {
                         name="email"
                         value={formValues.email}
                         onValidationChange={handleValidationChange("email")}
+
                     />
                     <Input
                         label="Password"
@@ -168,6 +178,7 @@ export default function RegisterPage() {
                         name="password"
                         value={formValues.password}
                         onValidationChange={handleValidationChange("password")}
+
                     />
                     <Input
                         label="Confirm Password"
@@ -177,25 +188,31 @@ export default function RegisterPage() {
                         errorMessage={formValues.password === "" ? "Please enter a password first" : "Passwords do not match"}
                         value={formValues.confirmPassword}
                         onValidationChange={handleValidationChange("confirmPassword")}
+
                     />
 
                     <div className="mt-10 flex gap-6 justify-end">
                         <Button
-                            className="bg-gray-500 text-white hover:bg-gray-400"
+                            // className="bg-neutral-100 text-text dark:text-text-dark hover:bg-neutral-80 px-4 py-3 rounded-md"
                             type="button"
+                            variant={"ghost"}
                             onClick={handleCancel}
                         >
                             Cancel
                         </Button>
                         <Button
                             type="submit"
+                            variant={"default"}
                             disabled={!isFormValid}
+                            // className="bg-primary-100 text-white hover:bg-primary-80 px-4 py-3 rounded-md"
                         >
                             Register
                         </Button>
                     </div>
                 </div>
             </form>
+            
+
         </div>
     );
 }

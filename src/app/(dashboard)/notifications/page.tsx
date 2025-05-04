@@ -41,7 +41,7 @@ export default function NotificationsPage() {
     if (error) return <div className="p-4 text-center text-red-500">{error}</div>;
 
     return (
-        <div className="flex justify-center flex-col">
+        <div className="flex bg-background dark:bg-background-dark justify-center flex-col">
             <SubHeader
                 name="Notifications"
                 icon={<FaBell size={20} />}
@@ -50,21 +50,21 @@ export default function NotificationsPage() {
                     notifications.length > 0 && (
                         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                             <DialogTrigger asChild>
-                                <Badge className="cursor-pointer hover:bg-gray-200">Tout effacer</Badge>
+                                <Badge className="cursor-pointer hover:bg-primary-20 p-2 px-3  rounded-lg">Delete All</Badge>
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
-                                    <DialogTitle>Effacer toutes les notifications</DialogTitle>
+                                    <DialogTitle>Delete all notifications</DialogTitle>
                                     <DialogDescription>
-                                        Êtes-vous sûr de vouloir supprimer toutes vos notifications ? Cette action est irréversible.
+                                        Are you sure to delete all your notifications? This action is irreversible.
                                     </DialogDescription>
                                 </DialogHeader>
                                 <DialogFooter>
-                                    <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                                        Annuler
+                                    <Button variant="outline" size={"sm"} onClick={() => setIsDialogOpen(false)}>
+                                        Cancel
                                     </Button>
-                                    <Button variant="destructive" onClick={handleClearAll}>
-                                        Tout effacer
+                                    <Button variant="destructive" size={"sm"} onClick={handleClearAll}>
+                                        Delete All
                                     </Button>
                                 </DialogFooter>
                             </DialogContent>
