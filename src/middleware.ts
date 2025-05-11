@@ -2,14 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyRefreshToken } from "@/lib/api/authApi";
 
 export async function middleware(req: NextRequest) {
-    const publicRoutes = ["/register", "/login"];
+    const publicRoutes = [
+        "/register",
+        "/login",
+        "/forgot-password",
+        "/reset-password/:token*", // Motif pour inclure les routes dynamiques
+    ];
     const refreshToken = req.cookies.get("refreshToken")?.value;
 
     console.log("Middleware - Chemin demandé:", req.nextUrl.pathname);
     console.log("Middleware - refreshToken dans cookies:", refreshToken || "non présent");
 
     // Autoriser l'accès aux routes publiques
-    if (publicRoutes.includes(req.nextUrl.pathname)) {
+    const pathname = req.nextUrl.pathname;
+    if (publicRoutes.some(route => {
+        if (route.includes(":token*")) {
+            return pathname.startsWith("/reset-password/");
+        }
+        return pathname === route;
+    })) {
         console.log("Middleware - Route publique, accès autorisé sans vérification");
         return NextResponse.next();
     }
@@ -39,6 +50,6 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
     matcher: [
-        "/((?!register|login|api|_next/static|_next/image|assets/.*|favicon.ico).*)",
+        "/((?!register|login|api|_next/static|_next/image|assets/.*|favicon.ico|reset-password/.*).*)",
     ],
 };

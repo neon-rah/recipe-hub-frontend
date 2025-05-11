@@ -92,3 +92,9 @@ export interface ApiError {
     error: string;
     message: string;
 }
+
+// Interface pour la réponse du backend pour la réinitialisation
+export interface ResetResponse {
+    success: boolean;
+    message: string;
+}

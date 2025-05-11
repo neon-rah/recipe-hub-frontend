@@ -1,17 +1,19 @@
 "use client";
 
-import React, { createContext, useState, useEffect, ReactNode } from "react";
-import api, { setAuthToken, getAuthToken } from "@/config/api";
+import React, {createContext, ReactNode, useEffect, useState} from "react";
+import api, {getAuthToken, setAuthToken} from "@/config/api";
 import {
+    completeRegistration,
+    initiatePasswordReset,
+    initiateRegistration,
     login,
     logout,
-    verifyRefreshToken,
     refreshToken,
     resendCode,
-    completeRegistration,
-    initiateRegistration
+    resetPassword,
+    verifyRefreshToken,
 } from "@/lib/api/authApi";
-import { User } from "@/types/user";
+import {ResetResponse, User} from "@/types/user";
 
 interface AuthContextType {
     user: User | null;
@@ -20,6 +22,8 @@ interface AuthContextType {
     initiateRegistration: (email: string) => Promise<void>;
     completeRegistration: (userDTO: FormData) => Promise<void>;
     resendCode: (email: string) => Promise<void>;
+    initiatePasswordReset: (email: string) => Promise<ResetResponse>;
+    resetPassword: (token: string, newPassword: string) => Promise<ResetResponse>;
     logout: () => void;
     loading: boolean;
     error: string | null;
@@ -188,6 +192,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const initiatePasswordResetHandler = async (email: string) => {
+        setLoading(true);
+        try {
+            return await initiatePasswordReset(email);
+        } catch (err) {
+            setError("Erreur lors de l'initiation de la réinitialisation");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const resetPasswordHandler = async (token: string, newPassword: string) => {
+        setLoading(true);
+        try {
+            return await resetPassword(token, newPassword);
+        } catch (err) {
+            setError("Erreur lors de la réinitialisation du mot de passe");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const logoutHandler = () => {
         setUser(null);
         setAuthToken(null);
@@ -204,6 +232,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 initiateRegistration: initiateRegistrationHandler,
                 completeRegistration: completeRegistrationHandler,
                 resendCode: resendCodeHandler,
+                initiatePasswordReset: initiatePasswordResetHandler,
+                resetPassword: resetPasswordHandler,
                 logout: logoutHandler,
                 loading,
                 error,

@@ -51,6 +51,8 @@ export default function LoginPage() {
 
     const goToRegister = () => router.push("/register");
 
+    const goToForgotPassword = () => router.push("/forgot-password");
+
     useEffect(() => {
         if (isLoggedIn) {
             const redirect = setTimeout(() => {
@@ -96,7 +98,8 @@ export default function LoginPage() {
                                 Password
                             </label>
                             <div className="text-sm">
-                                <a href="#"
+                                <a href="/forgot-password"
+                                   onClick={goToForgotPassword}
                                    className="font-semibold text-secondary-100 dark:text-secondary-dark-mode hover:text-secondary-80 dark:hover:text-secondary-dark-mode-80">
                                     Forgot password?
                                 </a>
@@ -128,7 +131,7 @@ export default function LoginPage() {
 
                 <p className="mt-10 text-center text-sm text-text-secondary dark:text-text-dark-secondary">
                     Not a member?{" "}
-                    <a href="#" onClick={goToRegister}
+                    <a href="/register" onClick={goToRegister}
                        className="font-semibold text-secondary-100 dark:text-secondary-dark-mode hover:text-secondary-80 dark:hover:text-secondary-dark-mode-80">
                         Sign up here
                     </a>
