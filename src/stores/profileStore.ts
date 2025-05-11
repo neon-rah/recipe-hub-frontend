@@ -4,7 +4,7 @@ import { create } from "zustand";
 import { getFollowers, getFollowing, getFollowerCount, isFollowingUser, followUser, unfollowUser } from "@/lib/api/followApi";
 import { findRecipesByUserId } from "@/lib/api/recipeApi";
 import { Recipe, RecipeDTO } from "@/types/recipe";
-import { Follower, User } from "@/types/user";
+import { Follower } from "@/types/user";
 
 interface ProfileState {
     recipes: Recipe[];

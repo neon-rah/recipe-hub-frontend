@@ -4,25 +4,55 @@ import { AxiosError } from "axios";
 import api, {setAuthToken} from "@/config/api";
 
 // Inscription
-export const register = async (formData: FormData): Promise<LoginResponse> => {
+export const initiateRegistration = async (email: string): Promise<void> => {
     try {
-        const res = await api.post("/auth/register", formData, {
+        const res = await api.post("/auth/register", { email });
+        console.log("Réponse initiateRegistration reçue:", res.data);
+    } catch (err) {
+        console.error("Erreur lors de l'initiation de l'inscription:", err);
+        const axiosError = err as AxiosError<{ message: string, error?: string }>;
+        if (axiosError.response) {
+            const { message, error } = axiosError.response.data;
+            throw new Error(message || error || "Initiation failed");
+        }
+        throw new Error("Network error during initiation");
+    }
+};
+
+export const completeRegistration = async (formData: FormData): Promise<LoginResponse> => {
+    try {
+        const res = await api.post("/auth/complete-registration", formData, {
             headers: { "Content-Type": "multipart/form-data" },
         });
         const { accessToken, user } = res.data;
-        console.log("Réponse register reçue:", { accessToken, user });
+        console.log("Réponse completeRegistration reçue:", { accessToken, user });
         return {
             accessToken,
             user: new User(user as UserDTO)
         };
     } catch (err) {
-        console.error("Erreur lors de l'inscription:", err);
+        console.error("Erreur lors de la finalisation de l'inscription:", err);
         const axiosError = err as AxiosError<{ message: string, error?: string }>;
         if (axiosError.response) {
             const { message, error } = axiosError.response.data;
             throw new Error(message || error || "Registration failed");
         }
         throw new Error("Network error during registration");
+    }
+};
+
+export const resendCode = async (email: string): Promise<void> => {
+    try {
+        const res = await api.post("/auth/resend-code", { email });
+        console.log("Réponse resendCode reçue:", res.data);
+    } catch (err) {
+        console.error("Erreur lors du renvoi du code:", err);
+        const axiosError = err as AxiosError<{ message: string, error?: string }>;
+        if (axiosError.response) {
+            const { message, error } = axiosError.response.data;
+            throw new Error(message || error || "Resend code failed");
+        }
+        throw new Error("Network error during resend code");
     }
 };
 

@@ -62,16 +62,16 @@ export default function LoginPage() {
     }, [isLoggedIn, router]);
 
     return (
-        <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-            <div className="sm:mx-auto sm:w-full sm:max-w-md max-w-xs flex flex-col items-center justify-center">
+        <div className="flex w-screen min-h-full  flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+            <div className=" flex flex-col items-center justify-center">
                 <GiChefToque className="text-primary-100" size={50} />
                 <h2 className="mt-10 text-center text-2xl font-bold tracking-tight text-text dark:text-text-dark">
                     Sign in to your account
                 </h2>
             </div>
 
-            <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-md max-w-xs ">
-                <form onSubmit={handleSubmit} className="space-y-6 sm:w-[400px] w-fit">
+            <div className=" flex flex-col items-center mt-10">
+                <form onSubmit={handleSubmit} className="space-y-6 sm:w-[400px] w-full">
                     <div>
                         <label htmlFor="email" className="block text-sm text-text dark:text-text-dark">
                             Email address

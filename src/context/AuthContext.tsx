@@ -2,14 +2,24 @@
 
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import api, { setAuthToken, getAuthToken } from "@/config/api";
-import { login, logout, register, verifyRefreshToken, refreshToken } from "@/lib/api/authApi";
+import {
+    login,
+    logout,
+    verifyRefreshToken,
+    refreshToken,
+    resendCode,
+    completeRegistration,
+    initiateRegistration
+} from "@/lib/api/authApi";
 import { User } from "@/types/user";
 
 interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
     login: (email: string, password: string) => Promise<void>;
-    register: (userDTO: FormData) => Promise<void>;
+    initiateRegistration: (email: string) => Promise<void>;
+    completeRegistration: (userDTO: FormData) => Promise<void>;
+    resendCode: (email: string) => Promise<void>;
     logout: () => void;
     loading: boolean;
     error: string | null;
@@ -140,16 +150,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const registerHandler = async (userDTO: FormData) => {
+    const initiateRegistrationHandler = async (email: string) => {
         setLoading(true);
         try {
-            const { accessToken, user } = await register(userDTO);
+            await initiateRegistration(email);
+        } catch (err) {
+            setError("Erreur lors de l'initiation de l'inscription");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const completeRegistrationHandler = async (userDTO: FormData) => {
+        setLoading(true);
+        try {
+            const { accessToken, user } = await completeRegistration(userDTO);
             setUser(user);
             setAuthToken(accessToken);
-            console.log("AuthProvider - Inscription réussie, user:", user);
         } catch (err) {
             setError("Erreur lors de l'inscription");
-            console.error("AuthProvider - Erreur d'inscription:", err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const resendCodeHandler = async (email: string) => {
+        setLoading(true);
+        try {
+            await resendCode(email);
+        } catch (err) {
+            setError("Erreur lors du renvoi du code");
             throw err;
         } finally {
             setLoading(false);
@@ -169,7 +201,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 user,
                 isAuthenticated: !!user,
                 login: loginHandler,
-                register: registerHandler,
+                initiateRegistration: initiateRegistrationHandler,
+                completeRegistration: completeRegistrationHandler,
+                resendCode: resendCodeHandler,
                 logout: logoutHandler,
                 loading,
                 error,
