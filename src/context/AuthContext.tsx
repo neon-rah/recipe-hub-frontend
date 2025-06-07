@@ -13,7 +13,8 @@ import {
     resetPassword,
     verifyRefreshToken,
 } from "@/lib/api/authApi";
-import {ResetResponse, User} from "@/types/user";
+import {ResetResponse, User, UserDTO} from "@/types/user";
+import {changeUserPassword, updateUserProfile} from "@/lib/api/userApi";
 
 interface AuthContextType {
     user: User | null;
@@ -24,6 +25,8 @@ interface AuthContextType {
     resendCode: (email: string) => Promise<void>;
     initiatePasswordReset: (email: string) => Promise<ResetResponse>;
     resetPassword: (token: string, newPassword: string) => Promise<ResetResponse>;
+    updateUserProfile: (userId: string, formData: FormData) => Promise<UserDTO>;
+    changeUserPassword: (userId: string, data: { currentPassword: string; newPassword: string }) => Promise<void>;
     logout: () => void;
     loading: boolean;
     error: string | null;
@@ -216,6 +219,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const updateUserProfileHandler = async (userId: string, formData: FormData) => {
+        // setLoading(true);
+        try {
+            const updatedUser = await updateUserProfile(userId, formData);
+            setUser(new User(updatedUser));
+            return updatedUser;
+        } catch (err) {
+            setError("Erreur lors de la mise à jour du profil");
+            throw err;
+        } finally {
+            // setLoading(false);
+        }
+    };
+
+    const changeUserPasswordHandler = async (userId: string, data: { currentPassword: string; newPassword: string }) => {
+
+        try {
+            await changeUserPassword(userId, data);
+        } catch (err) {
+            setError("Erreur lors du changement de mot de passe");
+            throw err;
+        }
+    };
+
     const logoutHandler = () => {
         setUser(null);
         setAuthToken(null);
@@ -234,6 +261,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 resendCode: resendCodeHandler,
                 initiatePasswordReset: initiatePasswordResetHandler,
                 resetPassword: resetPasswordHandler,
+                updateUserProfile: updateUserProfileHandler,
+                changeUserPassword: changeUserPasswordHandler,
                 logout: logoutHandler,
                 loading,
                 error,

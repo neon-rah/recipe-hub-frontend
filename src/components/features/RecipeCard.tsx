@@ -37,7 +37,7 @@ export default function RecipeCard({ recipe, onClick, className = "" }: RecipeCa
                     src={recipe.image || "/placeholder.jpg"}
                     alt={recipe.title}
                     fill
-                    className="dark:opacity-90 w-full h-full"
+                    className="dark:opacity-90 w-full h-full object-cover"
                 />
                 <button
                     className="absolute top-3 right-3 bg-gray-800/70 dark:bg-gray-200/70  p-2 rounded-full hover:bg-gray-700 dark:hover:bg-gray-300 transition"

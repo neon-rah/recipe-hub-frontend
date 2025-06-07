@@ -1,4 +1,4 @@
-// lib/webSocketClient.ts
+
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useNotificationStore } from "@/stores/notificationStore";
@@ -7,7 +7,7 @@ import {Notification} from "@/types/notification";
 let stompClient: Client | null = null;
 let currentUserId: string | null = null;
 
-// lib/webSocketClient.ts
+
 export function initializeWebSocket(userId: string | null) {
     if (!userId) {
         console.log("[webSocketClient] Aucun userId, connexion annulée.");

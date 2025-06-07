@@ -98,3 +98,10 @@ export interface ResetResponse {
     success: boolean;
     message: string;
 }
+
+// Interface pour la réponse d'erreur du backend
+export interface ErrorResponse {
+    status: string;
+    error: string;
+    message: string;
+}

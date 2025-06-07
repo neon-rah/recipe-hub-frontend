@@ -12,7 +12,7 @@ interface RecipeDetailSidebarProps {
 
 export default function RecipeDetailSidebar({ recipe, onClose }: RecipeDetailSidebarProps) {
     return (
-        <div className="fixed  z-40 right-0 w-full sm:w-[400px] md:w-[450px] lg:w-[500px]
+        <div className="fixed z-40 right-0 w-full sm:w-[500px] md:w-[550px] lg:w-[700px]
                        bg-background dark:bg-background-dark-tertiary shadow-xl flex flex-col
                        top-0 h-full md:top-[60px] md:h-[calc(100vh-60px)]">
 
