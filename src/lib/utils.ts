@@ -31,3 +31,17 @@ export const timeSince = (date: string | Date, max: number = 7): string => {
     year: "numeric", // Année complète (ex. "2025")
   }).replace(",", ""); // Supprime la virgule par défaut après le jour
 };
+
+
+export function toImageUrl(pic : string) {
+  return  pic
+      ? `${process.env.NEXT_PUBLIC_SERVER_URL}${pic}`
+      : "/assets/profile-1.png";
+}
+export function formatDate(date: string) {
+  return new Date(date).toLocaleString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}

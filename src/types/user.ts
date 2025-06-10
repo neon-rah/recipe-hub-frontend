@@ -1,5 +1,7 @@
-// /app/types/user.ts
+
 import { RecipeDTO } from "./recipe";
+import {formatDate, toImageUrl} from "@/lib/utils";
+
 
 export interface UserDTO {
     idUser: string;
@@ -42,17 +44,11 @@ export class User implements UserDTO {
         this.password = user.password;
         this.address = user.address;
         this.profilePic = user.profilePic;
-        this.created = new Date(user.created).toLocaleString("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-        });
+        this.created = formatDate(user.created);
         this.resetToken = user.resetToken;
         this.resetTokenExpiredAt = user.resetTokenExpiredAt;
         this.recipes = user.recipes;
-        this.profileUrl = this.profilePic
-            ? `${process.env.NEXT_PUBLIC_SERVER_URL}${this.profilePic}`
-            : "/assets/profile-1.png";
+        this.profileUrl = toImageUrl(user.profilePic);
         this.userName = this.firstName
             ? `${this.firstName} ${this.lastName}`
             : this.lastName;

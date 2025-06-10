@@ -1,4 +1,4 @@
-// /app/types/recipe.ts
+
 import {User, UserDTO} from "./user";
 
 export interface RecipeDTO {
