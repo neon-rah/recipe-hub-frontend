@@ -256,21 +256,21 @@ export default function SettingsPage() {
                         className="dark:text-text-dark dark:hover:bg-neutral-800 px-6 py-2"
                         onClick={() => setActiveSection("account")}
                     >
-                        <span className="mr-2">📧</span> Compte
+                        <span className="mr-2">📧</span> Account
                     </Button>
                     <Button
                         variant={activeSection === "security" ? "default" : "ghost"}
                         className="dark:text-text-dark hover:bg-neutral-100 dark:hover:bg-neutral-800 px-6 py-2"
                         onClick={() => setActiveSection("security")}
                     >
-                        <span className="mr-2">🔒</span> Sécurité
+                        <span className="mr-2">🔒</span> Security
                     </Button>
                     <Button
                         variant="destructive"
                         className="px-6 py-2"
                         onClick={handleLogout}
                     >
-                        Se déconnecter
+                        Logout
                     </Button>
                 </div>
 

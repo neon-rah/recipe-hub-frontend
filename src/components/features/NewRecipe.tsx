@@ -172,7 +172,7 @@ export default function NewRecipe({ onSubmit, initialId }: NewRecipeProps) {
                                             type="button"
                                             variant="destructive"
                                             size="icon"
-                                            className="bg-red-400 hover:bg-red-300 dark:bg-primary-dark"
+                                            className="bg-alert hover:bg-alert/80"
                                             onClick={() => handleRemovePreparationStep(index)}
                                         >
                                             <TrashIcon className="w-4 h-4" />

@@ -12,6 +12,8 @@ import { FaUser } from "react-icons/fa6";
 import useAuth from "@/hooks/useAuth";
 import { useNotificationStore } from "@/stores/notificationStore";
 import { useEffect } from "react";
+import {BsGear} from "react-icons/bs";
+import {MdSettings} from "react-icons/md";
 
 type NavLinkType = { name: string; icon: React.ElementType; path: string };
 
@@ -136,13 +138,22 @@ const Profile: React.FC<ProfileProps> = ({ profileImage }) => {
                 </div>
             </PopoverTrigger>
             <PopoverContent className="flex z-[101] flex-col gap-2 w-48 bg-background dark:bg-background-dark p-3 rounded-lg shadow-lg">
-                <Button
+
+                <button
                     onClick={goToProfile}
-                    className="w-full py-2 text-text dark:text-text-dark hover:bg-neutral-20 dark:hover:bg-neutral-dark rounded-md"
-                    variant="ghost"
+                    className="flex items-center w-full p-2 text-text bg-transparent dark:text-text-dark dark:bg-transparent hover:bg-neutral-10 dark:hover:bg-neutral-10 rounded-md"
+
                 >
                     <FaUser size={18} className="mr-2" /> Profile
-                </Button>
+                </button>
+                <button
+                    onClick={()=>router.push("/setting")}
+                    className="flex items-center w-full p-2 text-text bg-transparent dark:text-text-dark dark:bg-transparent hover:bg-neutral-10 dark:hover:bg-neutral-10 rounded-md"
+
+                >
+                    <MdSettings size={22} className="mr-2" /> Settings
+                </button>
+
                 <LogoutButton />
             </PopoverContent>
         </Popover>
@@ -187,7 +198,7 @@ const LogoutButton = () => {
     return (
         <button
             onClick={handleLogout}
-            className="flex items-center w-full p-2 text-alert dark:text-alert-dark bg-background dark:bg-background-dark hover:bg-neutral-20 dark:hover:bg-neutral-dark rounded-md"
+            className="flex items-center w-full p-2 text-alert dark:text-alert bg-neutral-20 dark:bg-neutral-20 hover:bg-neutral-10 dark:hover:bg-neutral-10 rounded-md"
         >
             <FaSignOutAlt size={18} className="mr-2" /> Logout
         </button>

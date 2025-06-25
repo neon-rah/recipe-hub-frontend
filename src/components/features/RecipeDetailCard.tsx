@@ -1,11 +1,10 @@
-// /app/components/features/recipe-detail-card.tsx
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { MoreHorizontal, Heart, UserCircle, Bookmark } from "lucide-react";
-import { useState } from "react";
+import { MoreHorizontal, Heart, UserCircle, Bookmark, MessageCircle } from "lucide-react";
+import {useState} from "react";
 import { Recipe } from "@/types/recipe";
 import { timeSince } from "@/lib/utils";
 import { useLike } from "@/hooks/useLike";
@@ -23,6 +22,9 @@ import {
     AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import useAuth from "@/hooks/useAuth";
+import useWebSocket from "@/hooks/useWebSocket";
+import CommentSection from "@/components/features/CommentSection";
+import {useComments} from "@/hooks/useComment";
 
 interface RecipeDetailCardProps {
     recipe: Recipe;
@@ -36,29 +38,36 @@ export default function RecipeDetailCard({ recipe, expand = false }: RecipeDetai
     const { liked, likeCount, loading: likeLoading, error: likeError, setError: setLikeError, handleToggleLike } = useLike(recipe.id);
     const { saved, loading: savedLoading, error: savedError, setError: setSavedError, handleToggleSaved } = useSavedRecipe(recipe.id);
     const { handleUpdate, handleDelete } = useRecipeActions(recipe.id);
+    const {commentCount } = useComments(recipe.id);
+
+    useWebSocket(user?.idUser, recipe.id);
 
     const shortDescription = recipe.description.slice(0, 170) + (recipe.description.length > 170 ? "..." : "");
     const isOwner = user?.idUser === recipe.userId;
 
     const handleConfirmDelete = async () => {
-        await handleDelete();
-        setShowDeleteConfirm(false);
+        try {
+            await handleDelete();
+            setShowDeleteConfirm(false);
+        } catch (err) {
+            setLikeError(err instanceof Error ? err.message : "Échec de la suppression de la recette");
+        }
     };
 
     return (
-        <Card className="p-4 bg-white m-0  max-w-[700px] dark:bg-primary-20 border-none shadow-soft dark:text-white rounded-lg ">
-            <div className="flex items-center justify-between">
+        <Card className="p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm">
+            <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                     {recipe.owner?.profileUrl ? (
                         <img src={recipe.owner?.profileUrl} alt={recipe.owner?.userName} className="w-10 h-10 rounded-full object-cover" />
                     ) : (
-                        <UserCircle className="w-10 h-10 text-gray-500" />
+                        <UserCircle className="w-10 h-10 text-gray-500 dark:text-gray-400" />
                     )}
                     <div>
-                        <Link href={`/profile/${recipe.userId}`} className="text-gray-700 dark:text-gray-100 font-semibold hover:underline">
+                        <Link href={`/profile/${recipe.userId}`} className="text-gray-900 dark:text-gray-100 font-semibold hover:underline">
                             {recipe.owner?.userName}
                         </Link>
-                        <p className="text-xs text-gray-500">{timeSince(recipe.updatedDate)}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{timeSince(recipe.updatedDate)}</p>
                     </div>
                 </div>
 
@@ -66,39 +75,39 @@ export default function RecipeDetailCard({ recipe, expand = false }: RecipeDetai
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="w-5 h-5" />
+                                <MoreHorizontal className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-40 flex flex-col gap-2 bg-white dark:bg-background-dark-secondary dark:text-white p-2 rounded-lg shadow-md">
-                            <button onClick={handleUpdate} className="block bg-transparent text-black dark:text-white  w-full text-left px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                                Update
+                        <PopoverContent className="w-40 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-md">
+                            <button onClick={handleUpdate} className="block text-gray-900 dark:text-gray-100 w-full text-left px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                Modifier
                             </button>
-                            <button onClick={() => setShowDeleteConfirm(true)} className="block bg-alert w-full text-left px-2 py-1 hover:bg-alert/80 dark:hover:bg-gray-700 rounded">
-                                Delete
+                            <button onClick={() => setShowDeleteConfirm(true)} className="block text-red-600 w-full text-left px-2 py-1 hover:bg-red-100 dark:hover:bg-red-900 rounded">
+                                Supprimer
                             </button>
                         </PopoverContent>
                     </Popover>
                 ) : (
                     <Button variant="ghost" size="icon" onClick={handleToggleSaved} disabled={savedLoading}>
-                        <Bookmark className={`w-6 h-6 ${saved ? "text-blue-500 fill-blue-500" : "text-gray-500"}`} />
+                        <Bookmark className={`w-6 h-6 ${saved ? "text-blue-600 fill-blue-600" : "text-gray-500 dark:text-gray-400"}`} />
                     </Button>
                 )}
             </div>
 
-            <h2 className="text-subtitle-3 font-semibold mt-2">{recipe.title}</h2>
-            <p className="text-sm mt-2">{expanded ? recipe.description : shortDescription}</p>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">{recipe.title}</h2>
+            <p className="text-gray-700 dark:text-gray-300 mb-3">{expanded ? recipe.description : shortDescription}</p>
 
             {expanded && (
                 <>
-                    <h3 className="text-lead underline mt-3 font-semibold">Ingredients :</h3>
-                    <ul className="list-disc pl-5">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Ingrédients :</h3>
+                    <ul className="list-disc pl-5 mb-4 text-gray-700 dark:text-gray-300">
                         {recipe.ingredientsList.map((ingredient, index) => (
                             <li key={index} className="text-sm">{ingredient}</li>
                         ))}
                     </ul>
 
-                    <h3 className="text-lead underline mt-3 font-semibold">Preparation :</h3>
-                    <ol className="list-decimal pl-5">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Préparation :</h3>
+                    <ol className="list-decimal pl-5 mb-4 text-gray-700 dark:text-gray-300">
                         {recipe.steps.map((step, index) => (
                             <li key={index} className="text-sm">{step}</li>
                         ))}
@@ -106,28 +115,37 @@ export default function RecipeDetailCard({ recipe, expand = false }: RecipeDetai
                 </>
             )}
 
-            <a onClick={() => setExpanded(!expanded)} className="text-blue-500 p-0 focus:border-none bg-transparent hover:bg-transparent hover:text-blue-400 hover:underline mt-2 text-small-2">
-                {!expanded ? "Read more" : "Read less"}
-            </a>
+            <button onClick={() => setExpanded(!expanded)} className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                {expanded ? "Voir moins" : "Voir plus"}
+            </button>
 
-            <img src={recipe.image} alt={recipe.title} className="w-full h-[250px] object-cover rounded-lg mt-3" />
+            <img src={recipe.image} alt={recipe.title} className="w-full h-64 object-cover rounded-lg mt-3" />
 
-            <div className="mt-3 flex items-center gap-1">
+            <div className="flex items-center gap-20 mt-3 text-gray-600 dark:text-gray-400">
                 <Button variant="ghost" size="icon" onClick={handleToggleLike} disabled={likeLoading}>
-                    <Heart className={`w-6 h-6 ${liked ? "text-red-500 fill-red-500" : "text-gray-500"}`} />
+                    <Heart className={`w-6 h-6 ${liked ? "text-red-500 fill-red-500" : ""}`} />
+                    <span>{likeCount}</span>
                 </Button>
-                <span className="text-sm">{likeCount} Likes</span>
+
+                <Button variant="ghost" size="icon" asChild>
+                    <Link href="#comments">
+                        <MessageCircle className="w-6 h-6" />
+                        <span className="ml-1">{commentCount} Commentaires</span>
+                    </Link>
+                </Button>
             </div>
+
+            <CommentSection recipeId={recipe.id} />
 
             {(likeError || savedError) && (
                 <AlertDialog open={!!(likeError || savedError)}>
                     <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle>Error</AlertDialogTitle>
+                            <AlertDialogTitle>Erreur</AlertDialogTitle>
                             <AlertDialogDescription>{likeError || savedError}</AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <AlertDialogCancel onClick={() => { setLikeError(null); setSavedError(null); }}>Close</AlertDialogCancel>
+                            <AlertDialogCancel onClick={() => { setLikeError(null); setSavedError(null); }}>Fermer</AlertDialogCancel>
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
@@ -137,15 +155,15 @@ export default function RecipeDetailCard({ recipe, expand = false }: RecipeDetai
                 <AlertDialog open={showDeleteConfirm}>
                     <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
                             <AlertDialogDescription>
-                                Are you sure you want to delete this recipe? This action cannot be undone.
+                                Êtes-vous sûr de vouloir supprimer cette recette ? Cette action est irréversible.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <AlertDialogCancel onClick={() => setShowDeleteConfirm(false)}>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleConfirmDelete} className="bg-red-500 hover:bg-red-600">
-                                Delete
+                            <AlertDialogCancel onClick={() => setShowDeleteConfirm(false)}>Annuler</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleConfirmDelete} className="bg-red-600 hover:bg-red-700 text-white">
+                                Supprimer
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>

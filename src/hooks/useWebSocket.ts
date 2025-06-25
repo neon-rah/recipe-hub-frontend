@@ -1,62 +1,140 @@
-// hooks/useWebSocket.js
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useNotificationStore } from "@/stores/notificationStore";
-import {Notification} from "@/types/notification";
+import { useCommentStore } from "@/stores/commentStore";
+import { Notification } from "@/types/notification";
+import { CommentDTO } from "@/types/comment";
+import { useToast } from "@/hooks/use-toast";
+import { getAuthToken } from "@/config/api";
 
-/**
- * Hook pour gérer la connexion WebSocket et recevoir les notifications en temps réel.
- * @param {string} userId - L'ID de l'utilisateur connecté pour s'abonner au topic correspondant.
- */
-export default function useWebSocket(userId:string | undefined) {
-    const { addNotification } = useNotificationStore((state) => ({
-        addNotification: state.addNotification,
-    }));
+export default function useWebSocket(userId: string | undefined, recipeId?: number) {
+    const { toast } = useToast();
+    const clientRef = useRef<Client | null>(null);
+
+    // Memoize store actions to ensure stable references
+    const addNotification = useCallback(
+        (notification: Notification) => useNotificationStore.getState().addNotification(notification),
+        []
+    );
+    const addComment = useCallback(
+        (comment: CommentDTO) => useCommentStore.getState().addComment(comment),
+        []
+    );
+    const addReply = useCallback(
+        (reply: CommentDTO) => useCommentStore.getState().addReply(reply),
+        []
+    );
+    const deleteComment = useCallback(
+        (id: number) => useCommentStore.getState().deleteComment(id),
+        []
+    );
 
     useEffect(() => {
         if (!userId) {
-            console.log("[useWebSocket] Aucun userId fourni, connexion annulée.");
+            console.log("[useWebSocket] No userId provided, connection aborted.");
             return;
         }
 
-        // Initialisation de SockJS pour la compatibilité avec les navigateurs sans WebSocket natif
-        const socket = new SockJS("http://localhost:8080/ws"); // Ajustez l'URL selon votre backend
-        const stompClient = new Client({
+        // Prevent multiple connections
+        if (clientRef.current?.active) {
+            console.log("[useWebSocket] WebSocket already connected for user:", userId);
+            return;
+        }
+
+        const socket = new SockJS("http://localhost:8080/ws");
+        const client = new Client({
             webSocketFactory: () => socket,
-            reconnectDelay: 5000, // Reconnexion automatique après 5 secondes en cas de déconnexion
-            debug: (str) => console.log("[useWebSocket] Debug STOMP:", str), // Logs pour déboguer la connexion
+            reconnectDelay: 5000,
+            debug: (str) => console.log("[useWebSocket] Debug STOMP:", str),
+            connectHeaders: {
+                Authorization: `Bearer ${getAuthToken()}`,
+            },
         });
 
-        stompClient.onConnect = () => {
-            console.log("[useWebSocket] Connecté au WebSocket pour l'utilisateur:", userId);
-            // S'abonner au topic spécifique de l'utilisateur
-            stompClient.subscribe(`/topic/notifications/${userId}`, (message) => {
+        clientRef.current = client;
+
+        client.onConnect = () => {
+            console.log("[useWebSocket] Connected to WebSocket for user:", userId);
+
+            // Subscribe to notifications
+            client.subscribe(`/topic/notifications/${userId}`, (message) => {
                 try {
                     const notification = JSON.parse(message.body);
-                    console.log("[useWebSocket] Nouvelle notification reçue:", notification);
-                    addNotification(new Notification(notification)); // Ajouter la notification au store
+                    console.log("[useWebSocket] New notification received:", notification);
+                    addNotification(new Notification(notification));
+                    toast({
+                        title: "New Notification",
+                        description: notification.message,
+                    });
                 } catch (error) {
-                    console.error("[useWebSocket] Erreur lors du parsing de la notification:", error);
+                    console.error("[useWebSocket] Error parsing notification:", error);
+                    toast({
+                        title: "Error",
+                        description: "Failed to process notification",
+                        variant: "destructive",
+                    });
                 }
+            });
+
+            // Subscribe to comments if recipeId is provided
+            if (recipeId) {
+                client.subscribe(`/topic/comments/${recipeId}`, (message) => {
+                    try {
+                        const comment: CommentDTO = JSON.parse(message.body);
+                        console.log("[useWebSocket] New comment received:", comment);
+                        if (comment.deleted) {
+                            deleteComment(comment.idComment);
+                            toast({
+                                title: "Comment Deleted",
+                                description: "The comment has been deleted successfully.",
+                            });
+                        } else if (comment.parentId) {
+                            addReply(comment);
+                            toast({
+                                title: "New Reply",
+                                description: `${comment.userFullName} replied to a comment.`,
+                            });
+                        } else {
+                            addComment(comment);
+                            toast({
+                                title: "New Comment",
+                                description: `${comment.userFullName} added a comment.`,
+                            });
+                        }
+                    } catch (error) {
+                        console.error("[useWebSocket] Error parsing comment:", error);
+                        toast({
+                            title: "Error",
+                            description: "Failed to process comment",
+                            variant: "destructive",
+                        });
+                    }
+                });
+            }
+        };
+
+        client.onStompError = (error) => {
+            console.error("[useWebSocket] STOMP Error:", error);
+            toast({
+                title: "WebSocket Error",
+                description: "Failed to connect to real-time server",
+                variant: "destructive",
             });
         };
 
-        stompClient.onStompError = (error) => {
-            console.error("[useWebSocket] Erreur STOMP:", error);
-        };
+        client.activate();
 
-        stompClient.activate();
-
-        // Nettoyage lors du démontage du composant
         return () => {
-            stompClient.deactivate();
-            console.log("[useWebSocket] Déconnecté du WebSocket pour l'utilisateur:", userId);
+            if (clientRef.current) {
+                clientRef.current.deactivate();
+                console.log("[useWebSocket] Disconnected from WebSocket for user:", userId);
+                clientRef.current = null;
+            }
         };
-    }, [userId, addNotification]);
+    }, [userId, recipeId, toast, addNotification, addComment, addReply, deleteComment]);
 
-    return null; // Ce hook ne retourne rien, il gère juste la connexion
+    return null;
 }
-
