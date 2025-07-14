@@ -1,62 +1,98 @@
-import { useComments } from '@/hooks/useComment';
-import CommentItem from './CommentItem';
-import CommentInput from '@/components/features/CommentInput';
-import { CommentDTO } from '@/types/comment';
+// CommentSection.tsx
+"use client";
+import CommentItem from "./CommentItem";
+import CommentInput from "./CommentInput";
+import { useEffect, useState } from "react";
+import { useComments } from "@/hooks/useComment";
 
 interface CommentSectionProps {
     recipeId: number;
 }
 
 export default function CommentSection({ recipeId }: CommentSectionProps) {
-    const { comments, handleCreateComment, handleCreateReply, handleDeleteComment } = useComments(recipeId);
+    const {
+        comments,
+        commentCount,
+        handleCreateComment,
+        handleCreateReply,
+        handleDeleteComment,
+    } = useComments(recipeId);
 
-    // Débogage : Afficher les commentaires reçus
-    console.log("recipeId", recipeId);
-    console.log('Commentaires reçus :', comments);
+    const [visibleReplies, setVisibleReplies] = useState<Record<number, boolean>>({});
 
-    // Séparer parents et enfants
-    const parentComments = comments.filter((c) => c.parentId == null);
-    const childComments = comments.filter((c) => c.parentId !== null);
+    useEffect(() => {
+        const parentComments = comments.filter(c => c.parentId === 0 || c.parentId === null);
+        const initialVisibleState: Record<number, boolean> = {};
+        parentComments.forEach(parent => {
+            initialVisibleState[parent.idComment] = false; // cacher par défaut
+        });
+        setVisibleReplies(prev => ({ ...initialVisibleState, ...prev }));
+    }, [comments]);
 
-    // Débogage : Afficher les parents et enfants filtrés
-    console.log('Commentaires parents :', parentComments);
-    console.log('Commentaires enfants :', childComments);
+    const parentComments = comments.filter(c => c.parentId === 0 || c.parentId === null);
+    const childComments = comments.filter(c => c.parentId !== 0 && c.parentId !== null);
 
     return (
-        <div className="mt-6 px-2">
-            <h3 className="text-lg font-semibold text-text dark:text-dark mb-4">Commentaires</h3>
-            <div className="space-y-2">
-                {parentComments.length === 0 ? (
-                    <p className="text-sm text-neutral-500">Aucun commentaire pour l&#39;instant.</p>
-                ) : (
-                    parentComments.map((comment) => (
-                        <div key={comment.idComment}>
+        <div className="mt-6 px-4 max-w-2xl mx-auto">
+            <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">
+                Commentaires ({commentCount})
+            </h3>
+            <div className="space-y-4">
+                {parentComments.map((parent) => {
+                    const replies = childComments.filter(c => c.parentId === parent.idComment);
+                    const show = visibleReplies[parent.idComment] ?? false;
+
+                    return (
+                        <div key={parent.idComment}>
                             <CommentItem
-                                comment={comment}
-                                onReply={handleCreateReply}
+                                comment={parent}
+                                onReply={(parentId, content) => {
+                                    handleCreateReply(parentId, content);
+                                    setVisibleReplies((prev) => ({
+                                        ...prev,
+                                        [parent.idComment]: true,
+                                    }));
+                                }}
                                 onDelete={handleDeleteComment}
+                                level={0}
                             />
-                            {childComments
-                                .filter((child) => child.parentId === comment.idComment)
-                                .map((child: CommentDTO) => (
-                                    <CommentItem
-                                        key={child.idComment}
-                                        comment={child}
-                                        onReply={handleCreateReply}
-                                        onDelete={handleDeleteComment}
-                                        level={1}
-                                    />
-                                ))}
+
+                            {replies.length > 0 && (
+                                <div
+                                    className="ml-12 mt-2 text-sm text-blue-600 cursor-pointer hover:underline"
+                                    onClick={() =>
+                                        setVisibleReplies((prev) => ({
+                                            ...prev,
+                                            [parent.idComment]: !show,
+                                        }))
+                                    }
+                                >
+                                    {show
+                                        ? "Masquer les réponses"
+                                        : `Afficher les ${replies.length} réponse(s)`}
+                                </div>
+                            )}
+
+                            {show && replies.length > 0 && (
+                                <div className="ml-6 mt-2 space-y-3">
+                                    {replies.map((reply) => (
+                                        <CommentItem
+                                            key={reply.idComment}
+                                            comment={reply}
+                                            onReply={handleCreateReply}
+                                            onDelete={handleDeleteComment}
+                                            level={1}
+                                        />
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                    ))
-                )}
+                    );
+                })}
             </div>
-            {parentComments.length > 0 && (
-                <div className="sticky bottom-0 bg-white dark:bg-gray-900 p-3 border-t border-neutral-200 dark:border-neutral-700">
-                    <CommentInput onSubmit={handleCreateComment} />
-                </div>
-            )}
-            {parentComments.length === 0 && <CommentInput onSubmit={handleCreateComment} />}
+            <div className="mt-6">
+                <CommentInput onSubmit={handleCreateComment} />
+            </div>
         </div>
     );
 }

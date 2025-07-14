@@ -6,7 +6,7 @@ export interface CommentDTO {
     recipeId: number;
     userFullName: string;
     userProfilePic: string;
-    parentId?: number;
+    parentId: number;
     content: string;
     createdAt: string;
     replies?: CommentDTO[];
@@ -20,7 +20,7 @@ export class Comment implements CommentDTO {
     userFullName: string;
     userProfilePic: string;
     userProfileUrl: string;
-    parentId?: number;
+    parentId: number;
     content: string;
     createdAt: string;
     replies?: CommentDTO[];

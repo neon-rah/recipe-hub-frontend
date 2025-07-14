@@ -1,14 +1,17 @@
+// CommentItem.tsx
 import { CommentDTO } from '@/types/comment';
 import { timeSince } from '@/lib/utils';
-import {UserCircle, Trash2, Reply, MoreHorizontal} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { UserCircle, MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import useAuth from '@/hooks/useAuth';
-import CommentInput from "@/components/features/CommentInput";
-
+import CommentInput from './CommentInput';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
 
 interface CommentItemProps {
     comment: CommentDTO;
@@ -17,20 +20,22 @@ interface CommentItemProps {
     level?: number;
 }
 
-export default function CommentItem({ comment, onReply, onDelete }: CommentItemProps) {
+export default function CommentItem({ comment, onReply, onDelete, level = 0 }: CommentItemProps) {
     const [showReplyInput, setShowReplyInput] = useState(false);
     const { user } = useAuth();
     const { toast } = useToast();
     const isOwner = user?.idUser === comment.userId;
+    // const isOwner = true;
 
     const handleReplySubmit = async (content: string) => {
         try {
-            await onReply(comment.idComment, content);
+            const parentId = comment.parentId === 0 ? comment.idComment : comment.parentId ;
+            onReply(parentId, content);
             setShowReplyInput(false);
         } catch (err) {
             toast({
                 title: 'Erreur',
-                description: err instanceof Error ? err.message : 'Échec de la publication de la réponse',
+                description: err instanceof Error ? err.message : 'Erreur lors de la réponse.',
                 variant: 'destructive',
             });
         }
@@ -39,72 +44,76 @@ export default function CommentItem({ comment, onReply, onDelete }: CommentItemP
     const handleDelete = async () => {
         try {
             await onDelete(comment.idComment);
-            toast({
-                title: 'Succès',
-                description: 'Commentaire supprimé avec succès',
-            });
         } catch (err) {
             toast({
                 title: 'Erreur',
-                description: err instanceof Error ? err.message : 'Échec de la suppression du commentaire',
+                description: err instanceof Error ? err.message : 'Erreur suppression',
                 variant: 'destructive',
             });
         }
     };
 
-    // Afficher uniquement les enfants si parentId existe, pas de sous-sous-commentaires
-    const isChild = comment.parentId !== null;
-    const marginClass = isChild ? 'ml-8' : '';
-
     return (
-        <div className={`flex gap-2 p-2 ${marginClass} bg-white dark:bg-primary-20 border-b border-neutral-200 dark:border-neutral-700`}>
-            {comment.userProfilePic ? (
-                <img src={comment.userProfilePic} alt={comment.userFullName} className="w-8 h-8 rounded-full object-cover" />
-            ) : (
-                <UserCircle className="w-8 h-8 text-neutral-500" />
-            )}
+        <div className={`flex gap-3 ${level > 0 ? 'pl-6' : ''}`}>
+            <div className="flex-shrink-0">
+                {comment.userProfilePic ? (
+                    <img
+                        src={comment.userProfilePic}
+                        alt={comment.userFullName}
+                        className="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-gray-700"
+                    />
+                ) : (
+                    <UserCircle className="w-10 h-10 text-gray-400" />
+                )}
+            </div>
             <div className="flex-1">
-                <div className="text-sm text-text dark:text-dark">
-                    <Link href={`/profile/${comment.userId}`} className="font-semibold hover:underline">
-                        {comment.userFullName}
-                    </Link>
-                    <span className="ml-2 text-neutral-500">{comment.content}</span>
-                </div>
-                <div className="flex items-center gap-4 text-xs text-neutral-500 mt-1">
-                    <span>{timeSince(comment.createdAt)}</span>
-                    {!isChild && (
-                        <button
-                            className="text-secondary-500 hover:text-secondary dark:hover:text-secondary-dark-100 hover:underline flex items-center"
-                            onClick={() => setShowReplyInput(!showReplyInput)}
-                        >
-                            <Reply className="w-4 h-4 mr-1" /> Répondre
-                        </button>
-                    )}
-                    {isOwner && (
-                        <Popover>
-                            <PopoverTrigger>
-                                <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-neutral">
-                                    <MoreHorizontal className="w-4 h-4" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-32 bg-white dark:bg-primary-20 p-0">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="w-full text-left text-alert-500 hover:bg-alert-gray-100 dark:hover:bg-neutral-600 rounded-none px-2 py-1"
-                                    onClick={handleDelete}
+                <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 shadow-sm">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <Link
+                                href={`/profile/${comment.userId}`}
+                                className="font-medium text-sm text-gray-900 dark:text-gray-100 hover:underline"
+                            >
+                                {comment.userFullName}
+                            </Link>
+                            <p className="mt-1 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-line">{comment.content}</p>
+                            <div className="flex gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                <span>{timeSince(comment.createdAt)}</span>
+                                <span
+                                    className="cursor-pointer hover:text-blue-500"
+                                    onClick={() => setShowReplyInput(!showReplyInput)}
                                 >
-                                    <Trash2 className="w-4 h-4" />
-                                </Button>
-                            </PopoverContent>
-                        </Popover>
-                    )}
+                  Répondre
+                </span>
+                            </div>
+                        </div>
+                        {isOwner && (
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <div className="cursor-pointer p-1 text-gray-400 bg-transparent  hover:bg-background/80 hover:text-gray-600">
+                                        <MoreHorizontal className="w-4 h-4" />
+                                    </div>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-32 p-2 bg-white dark:bg-gray-800 shadow-md rounded">
+                                    <div
+                                        onClick={handleDelete}
+                                        className="text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900 w-full text-left px-2 py-1 rounded cursor-pointer"
+                                    >
+                                        Supprimer
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
+                        )}
+                    </div>
                 </div>
-                {showReplyInput && !isChild && (
-                    <div className="mt-2">
-                        <CommentInput onSubmit={handleReplySubmit} placeholder="Écrivez une réponse..." />
+
+                {showReplyInput && (
+                    <div className="mt-3">
+                        <CommentInput onSubmit={handleReplySubmit} placeholder="Votre réponse..." />
                     </div>
                 )}
+
+
             </div>
         </div>
     );

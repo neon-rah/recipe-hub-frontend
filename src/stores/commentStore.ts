@@ -12,25 +12,45 @@ interface CommentState {
 export const useCommentStore = create<CommentState>((set) => ({
     comments: [],
     addComment: (comment) =>
-        set((state) => ({
-            comments: [comment, ...state.comments],
-        })),
+        set((state) => {
+            // Vérifier que le commentaire n'existe pas déjà
+            const exists = state.comments.some(c => c.idComment === comment.idComment);
+            console.log('[commentStore] Adding comment:', comment.idComment, 'Exists:', exists);
+            return exists ? state : { comments: [comment, ...state.comments] };
+        }),
     addReply: (reply) =>
-        set((state) => ({
-            comments: state.comments.map((comment) =>
-                comment.idComment === reply.parentId
-                    ? { ...comment, replies: [...(comment.replies || []), reply] }
-                    : comment
-            ),
-        })),
+        set((state) => {
+            console.log('[commentStore] Adding reply:', reply.idComment, 'to parent:', reply.parentId);
+            return {
+                comments: state.comments.map((comment) => {
+                    // Vérifier si c'est le parent
+                    if (comment.idComment === reply.parentId) {
+                        // Vérifier que la réponse n'existe pas déjà
+                        const replyExists = comment.replies?.some(r => r.idComment === reply.idComment) ?? false;
+                        console.log('[commentStore] Reply exists:', replyExists);
+                        return replyExists ? comment : {
+                            ...comment,
+                            replies: [...(comment.replies || []), reply]
+                        };
+                    }
+                    return comment;
+                }),
+            };
+        }),
     deleteComment: (commentId) =>
-        set((state) => ({
-            comments: state.comments
-                .filter((comment) => comment.idComment !== commentId)
-                .map((comment) => ({
-                    ...comment,
-                    replies: comment.replies?.filter((reply) => reply.idComment !== commentId) || [],
-                })),
-        })),
-    setComments: (comments) => set({ comments }),
+        set((state) => {
+            console.log('[commentStore] Deleting comment:', commentId);
+            return {
+                comments: state.comments
+                    .filter((comment) => comment.idComment !== commentId)
+                    .map((comment) => ({
+                        ...comment,
+                        replies: comment.replies?.filter((reply) => reply.idComment !== commentId) || [],
+                    })),
+            };
+        }),
+    setComments: (comments) => {
+        console.log('[commentStore] Setting comments:', comments.length);
+        set({ comments });
+    },
 }));
