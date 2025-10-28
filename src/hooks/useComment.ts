@@ -7,21 +7,50 @@ import { useToast } from "@/hooks/use-toast";
 import useAuth from "@/hooks/useAuth";
 import { createComment, createReply, deleteComment, fetchCommentCount, fetchComments } from "@/lib/api/commentApi";
 
+/**
+ * Hook de gestion des commentaires avec WebSocket STOMP + Zustand
+ * @param recipeId ID de la recette à suivre
+ */
 export const useComments = (recipeId: number) => {
-    const { comments, addComment,addReply, deleteComment: storeDeleteComment, setComments } = useCommentStore();
+    const { comments, addComment, addReply, deleteComment: storeDeleteComment, setComments } = useCommentStore();
     const { user } = useAuth();
     const { toast } = useToast();
+
     const clientRef = useRef<Client | null>(null);
-    // const isInitialized = useRef(false);
-    const [commentCount, setCommentCount] = useState<number>(0);
     const subscriptionRef = useRef<string | null>(null);
     const prevRecipeIdRef = useRef<number | null>(null);
+    const [commentCount, setCommentCount] = useState<number>(0);
 
+    /**
+     * 1️⃣ Initialisation du client WebSocket STOMP (une seule fois)
+     */
     useEffect(() => {
-        // Réinitialiser lorsque la recette change
+        const socket = new SockJS("http://localhost:8080/ws");
+        const client = new Client({
+            webSocketFactory: () => socket,
+            reconnectDelay: 5000,
+            debug: (msg) => console.log("[STOMP Debug]", msg),
+        });
+
+        clientRef.current = client;
+        client.activate();
+
+        return () => {
+            console.log("[useComments] Cleanup global: deactivate client");
+            client.deactivate();
+        };
+    }, []); // 👈 S’exécute une seule fois au montage
+
+    /**
+     * 2️⃣ Gestion du chargement et de l’abonnement des commentaires selon la recette
+     */
+    useEffect(() => {
+        // Si on change de recette, on nettoie
         if (prevRecipeIdRef.current !== null && prevRecipeIdRef.current !== recipeId) {
+            console.log("[useComments] Recipe changed, reset comments");
             setComments([]);
             setCommentCount(0);
+
             if (clientRef.current && subscriptionRef.current) {
                 clientRef.current.unsubscribe(subscriptionRef.current);
                 subscriptionRef.current = null;
@@ -33,99 +62,75 @@ export const useComments = (recipeId: number) => {
             try {
                 const [fetchedComments, count] = await Promise.all([
                     fetchComments(recipeId),
-                    fetchCommentCount(recipeId)
+                    fetchCommentCount(recipeId),
                 ]);
                 setComments(fetchedComments);
                 setCommentCount(count);
             } catch (err) {
-                console.error('Erreur lors du chargement des commentaires :', err);
+                console.error("Erreur lors du chargement des commentaires :", err);
                 toast({
-                    title: 'Erreur',
-                    description: err instanceof Error ? err.message : 'Échec du chargement des commentaires',
-                    variant: 'destructive',
+                    title: "Erreur",
+                    description: err instanceof Error ? err.message : "Échec du chargement des commentaires",
+                    variant: "destructive",
                 });
             }
         };
 
         loadComments();
 
-        if (!clientRef.current) {
-            const socket = new SockJS('http://localhost:8080/ws');
-            const client = new Client({
-                webSocketFactory: () => socket,
-                reconnectDelay: 5000,
-                debug: (str) => console.log('[useComments] Debug STOMP:', str),
+        if (!clientRef.current) return;
+        const client = clientRef.current;
+
+        const subscribeToTopic = () => {
+            console.log("[useComments] Subscribing to topic:", `/topic/comments/${recipeId}`);
+            const subscription = client.subscribe(`/topic/comments/${recipeId}`, (message) => {
+                try {
+                    const comment: CommentDTO = JSON.parse(message.body);
+                    console.log("[useComments] Received via WS:", comment);
+
+                    if (comment.deleted) {
+                        storeDeleteComment(comment.idComment);
+                        setCommentCount((prev) => Math.max(prev - 1, 0));
+                    } else if (comment.parentId) {
+                        addReply(comment); // ✅ le store gère les doublons
+                        setCommentCount((prev) => prev + 1);
+                    } else {
+                        addComment(comment);
+                        setCommentCount((prev) => prev + 1);
+                    }
+                } catch (err) {
+                    console.error("[useComments] Error processing WS message:", err);
+                }
             });
 
-            clientRef.current = client;
+            subscriptionRef.current = subscription.id;
+        };
 
-            // Dans useComment.ts
-
-            client.onConnect = () => {
-                console.log('[useComments] Connected to WebSocket for recipe:', recipeId);
-
-                if (subscriptionRef.current) {
-                    client.unsubscribe(subscriptionRef.current);
-                }
-
-                const subscription = client.subscribe(`/topic/comments/${recipeId}`, (message) => {
-                    try {
-                        const comment: CommentDTO = JSON.parse(message.body);
-                        console.log('[useComments] Received comment via WS:', comment);
-
-                        if (comment.deleted) {
-                            console.log('[useComments] Processing deleted comment:', comment.idComment);
-                            storeDeleteComment(comment.idComment);
-                            setCommentCount(prev => Math.max(prev - 1, 0));
-                        } else {
-                            // Vérification plus robuste des doublons
-                            const isDuplicate = comments.some(c =>
-                                c.idComment === comment.idComment ||
-                                (c.replies && c.replies.some(r => r.idComment === comment.idComment))
-                            );
-
-                            console.log('[useComments] Is duplicate:', isDuplicate, 'for comment:', comment.idComment);
-
-                            if (!isDuplicate) {
-                                if (comment.parentId) {
-                                    console.log('[useComments] Adding reply:', comment.idComment, 'to parent:', comment.parentId);
-                                    addReply(comment);
-                                } else {
-                                    console.log('[useComments] Adding new parent comment:', comment.idComment);
-                                    addComment(comment);
-                                }
-                                setCommentCount(prev => prev + 1);
-                            }
-                        }
-                    } catch (err) {
-                        console.error('[useComments] Error processing WS message:', err);
-                    }
-                });
-
-                subscriptionRef.current = subscription.id;
-            };
-
-            client.onStompError = (err) => {
-                console.error('[useComments] STOMP Error:', err);
-            };
-
-            client.activate();
-
-            return () => {
-                if (clientRef.current && subscriptionRef.current) {
-                    clientRef.current.unsubscribe(subscriptionRef.current);
-                    clientRef.current.deactivate();
-                }
-            };
+        if (client.connected) {
+            subscribeToTopic();
+        } else {
+            client.onConnect = subscribeToTopic;
         }
-    }, [recipeId, setComments, addComment, storeDeleteComment, toast, comments, addReply]);
 
+        // Nettoyage à chaque changement de recette
+        return () => {
+            if (clientRef.current && subscriptionRef.current) {
+                console.log("[useComments] Unsubscribe from topic:", subscriptionRef.current);
+                clientRef.current.unsubscribe(subscriptionRef.current);
+                subscriptionRef.current = null;
+            }
+        };
+    }, [recipeId, setComments, addComment, addReply, storeDeleteComment, toast]);
+
+    /**
+     * 3️⃣ Gestion des actions utilisateur
+     */
     const handleCreateComment = async (content: string) => {
         if (!user?.idUser) {
             toast({
-                title: 'Erreur',
-                description: 'Vous devez être connecté pour commenter',
-                variant: 'destructive',
+                title: "Erreur",
+                description: "Vous devez être connecté pour commenter",
+                variant: "destructive",
             });
             return;
         }
@@ -133,9 +138,9 @@ export const useComments = (recipeId: number) => {
             await createComment(recipeId, content);
         } catch (err) {
             toast({
-                title: 'Erreur',
-                description: err instanceof Error ? err.message : 'Échec de la création du commentaire',
-                variant: 'destructive',
+                title: "Erreur",
+                description: err instanceof Error ? err.message : "Échec de la création du commentaire",
+                variant: "destructive",
             });
         }
     };
@@ -143,9 +148,9 @@ export const useComments = (recipeId: number) => {
     const handleCreateReply = async (parentId: number, content: string) => {
         if (!user?.idUser) {
             toast({
-                title: 'Erreur',
-                description: 'Vous devez être connecté pour répondre',
-                variant: 'destructive',
+                title: "Erreur",
+                description: "Vous devez être connecté pour répondre",
+                variant: "destructive",
             });
             return;
         }
@@ -153,9 +158,9 @@ export const useComments = (recipeId: number) => {
             await createReply(parentId, recipeId, content);
         } catch (err) {
             toast({
-                title: 'Erreur',
-                description: err instanceof Error ? err.message : 'Échec de la création de la réponse',
-                variant: 'destructive',
+                title: "Erreur",
+                description: err instanceof Error ? err.message : "Échec de la création de la réponse",
+                variant: "destructive",
             });
         }
     };
@@ -163,9 +168,9 @@ export const useComments = (recipeId: number) => {
     const handleDeleteComment = async (id: number) => {
         if (!user?.idUser) {
             toast({
-                title: 'Erreur',
-                description: 'Vous devez être connecté pour supprimer',
-                variant: 'destructive',
+                title: "Erreur",
+                description: "Vous devez être connecté pour supprimer",
+                variant: "destructive",
             });
             return;
         }
@@ -173,9 +178,9 @@ export const useComments = (recipeId: number) => {
             await deleteComment(id);
         } catch (err) {
             toast({
-                title: 'Erreur',
-                description: err instanceof Error ? err.message : 'Échec de la suppression',
-                variant: 'destructive',
+                title: "Erreur",
+                description: err instanceof Error ? err.message : "Échec de la suppression",
+                variant: "destructive",
             });
         }
     };
