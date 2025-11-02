@@ -3,11 +3,14 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import useAuth from "@/hooks/useAuth";
+import useWebSocket from "@/hooks/useWebSocket";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const { user, loading } = useAuth();
     const router = useRouter();
 
+    useWebSocket(user?.idUser);
+    
     useEffect(() => {
         if (!loading && !user) {
             router.push("/login");

@@ -7,12 +7,16 @@ import { useToast } from "@/hooks/use-toast";
 import useAuth from "@/hooks/useAuth";
 import { createComment, createReply, deleteComment, fetchCommentCount, fetchComments } from "@/lib/api/commentApi";
 
-/**
- * Hook de gestion des commentaires avec WebSocket STOMP + Zustand
- * @param recipeId ID de la recette à suivre
- */
 export const useComments = (recipeId: number) => {
-    const { comments, addComment, addReply, deleteComment: storeDeleteComment, setComments } = useCommentStore();
+    const {
+        addComment,
+        addReply,
+        deleteComment: storeDeleteComment,
+        setComments,
+        getComments
+    } = useCommentStore();
+
+    const comments = getComments(recipeId);
     const { user } = useAuth();
     const { toast } = useToast();
 
@@ -21,9 +25,7 @@ export const useComments = (recipeId: number) => {
     const prevRecipeIdRef = useRef<number | null>(null);
     const [commentCount, setCommentCount] = useState<number>(0);
 
-    /**
-     * 1️⃣ Initialisation du client WebSocket STOMP (une seule fois)
-     */
+    // WebSocket global connection
     useEffect(() => {
         const socket = new SockJS("http://localhost:8080/ws");
         const client = new Client({
@@ -39,19 +41,18 @@ export const useComments = (recipeId: number) => {
             console.log("[useComments] Cleanup global: deactivate client");
             client.deactivate();
         };
-    }, []); // 👈 S’exécute une seule fois au montage
+    }, []);
 
-    /**
-     * 2️⃣ Gestion du chargement et de l’abonnement des commentaires selon la recette
-     */
+    // Recipe-specific subscription and data loading
     useEffect(() => {
-        // Si on change de recette, on nettoie
+        // Cleanup previous recipe subscription if recipe changed
         if (prevRecipeIdRef.current !== null && prevRecipeIdRef.current !== recipeId) {
-            console.log("[useComments] Recipe changed, reset comments");
-            setComments([]);
+            console.log("[useComments] Recipe changed from", prevRecipeIdRef.current, "to", recipeId);
+            setComments(recipeId, []);
             setCommentCount(0);
 
             if (clientRef.current && subscriptionRef.current) {
+                console.log("[useComments] Unsubscribing from previous recipe");
                 clientRef.current.unsubscribe(subscriptionRef.current);
                 subscriptionRef.current = null;
             }
@@ -60,11 +61,14 @@ export const useComments = (recipeId: number) => {
 
         const loadComments = async () => {
             try {
+                console.log("[useComments] Loading comments for recipe:", recipeId);
                 const [fetchedComments, count] = await Promise.all([
                     fetchComments(recipeId),
                     fetchCommentCount(recipeId),
                 ]);
-                setComments(fetchedComments);
+
+                console.log("[useComments] Fetched comments:", fetchedComments);
+                setComments(recipeId, fetchedComments);
                 setCommentCount(count);
             } catch (err) {
                 console.error("Erreur lors du chargement des commentaires :", err);
@@ -89,13 +93,15 @@ export const useComments = (recipeId: number) => {
                     console.log("[useComments] Received via WS:", comment);
 
                     if (comment.deleted) {
-                        storeDeleteComment(comment.idComment);
+                        storeDeleteComment(recipeId, comment.idComment);
                         setCommentCount((prev) => Math.max(prev - 1, 0));
-                    } else if (comment.parentId) {
-                        addReply(comment); // ✅ le store gère les doublons
+                    } else if (comment.parentId && comment.parentId !== 0) {
+                        console.log("[useComments] Adding reply via WS:", comment.idComment, "to parent:", comment.parentId);
+                        addReply(recipeId, comment);
                         setCommentCount((prev) => prev + 1);
                     } else {
-                        addComment(comment);
+                        console.log("[useComments] Adding main comment via WS:", comment.idComment);
+                        addComment(recipeId, comment);
                         setCommentCount((prev) => prev + 1);
                     }
                 } catch (err) {
@@ -112,7 +118,6 @@ export const useComments = (recipeId: number) => {
             client.onConnect = subscribeToTopic;
         }
 
-        // Nettoyage à chaque changement de recette
         return () => {
             if (clientRef.current && subscriptionRef.current) {
                 console.log("[useComments] Unsubscribe from topic:", subscriptionRef.current);
@@ -122,9 +127,6 @@ export const useComments = (recipeId: number) => {
         };
     }, [recipeId, setComments, addComment, addReply, storeDeleteComment, toast]);
 
-    /**
-     * 3️⃣ Gestion des actions utilisateur
-     */
     const handleCreateComment = async (content: string) => {
         if (!user?.idUser) {
             toast({

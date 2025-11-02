@@ -4,31 +4,21 @@ import { useEffect, useRef, useCallback } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useNotificationStore } from "@/stores/notificationStore";
-import { useCommentStore } from "@/stores/commentStore";
 import { Notification } from "@/types/notification";
-import { CommentDTO } from "@/types/comment";
 import { useToast } from "@/hooks/use-toast";
 import { getAuthToken } from "@/config/api";
 
-export default function useWebSocket(userId: string | undefined, recipeId?: number) {
+/**
+ * Hook for managing WebSocket connection for notifications only.
+ * Comment subscriptions are handled in useComments hook to avoid conflicts.
+ */
+export default function useWebSocket(userId: string | undefined) {
     const { toast } = useToast();
     const clientRef = useRef<Client | null>(null);
 
     // Memoize store actions to ensure stable references
     const addNotification = useCallback(
         (notification: Notification) => useNotificationStore.getState().addNotification(notification),
-        []
-    );
-    const addComment = useCallback(
-        (comment: CommentDTO) => useCommentStore.getState().addComment(comment),
-        []
-    );
-    const addReply = useCallback(
-        (reply: CommentDTO) => useCommentStore.getState().addReply(reply),
-        []
-    );
-    const deleteComment = useCallback(
-        (id: number) => useCommentStore.getState().deleteComment(id),
         []
     );
 
@@ -59,7 +49,7 @@ export default function useWebSocket(userId: string | undefined, recipeId?: numb
         client.onConnect = () => {
             console.log("[useWebSocket] Connected to WebSocket for user:", userId);
 
-            // Subscribe to notifications
+            // Subscribe to notifications only
             client.subscribe(`/topic/notifications/${userId}`, (message) => {
                 try {
                     const notification = JSON.parse(message.body);
@@ -78,42 +68,6 @@ export default function useWebSocket(userId: string | undefined, recipeId?: numb
                     });
                 }
             });
-
-            // Subscribe to comments if recipeId is provided
-            if (recipeId) {
-                client.subscribe(`/topic/comments/${recipeId}`, (message) => {
-                    try {
-                        const comment: CommentDTO = JSON.parse(message.body);
-                        console.log("[useWebSocket] New comment received:", comment);
-                        if (comment.deleted) {
-                            deleteComment(comment.idComment);
-                            toast({
-                                title: "Comment Deleted",
-                                description: "The comment has been deleted successfully.",
-                            });
-                        } else if (comment.parentId) {
-                            addReply(comment);
-                            toast({
-                                title: "New Reply",
-                                description: `${comment.userFullName} replied to a comment.`,
-                            });
-                        } else {
-                            addComment(comment);
-                            toast({
-                                title: "New Comment",
-                                description: `${comment.userFullName} added a comment.`,
-                            });
-                        }
-                    } catch (error) {
-                        console.error("[useWebSocket] Error parsing comment:", error);
-                        toast({
-                            title: "Error",
-                            description: "Failed to process comment",
-                            variant: "destructive",
-                        });
-                    }
-                });
-            }
         };
 
         client.onStompError = (error) => {
@@ -134,7 +88,7 @@ export default function useWebSocket(userId: string | undefined, recipeId?: numb
                 clientRef.current = null;
             }
         };
-    }, [userId, recipeId, toast, addNotification, addComment, addReply, deleteComment]);
+    }, [userId, toast, addNotification]);
 
     return null;
 }

@@ -1,3 +1,5 @@
+//app/(dashboard)/layout.tsx
+
 "use client";
 
 import Navbar from "@/components/layout/NavBar";

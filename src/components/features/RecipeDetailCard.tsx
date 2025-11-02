@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MoreHorizontal, Heart, UserCircle, Bookmark, MessageCircle } from "lucide-react";
-import {useState} from "react";
+import { useState, useEffect } from "react";
 import { Recipe } from "@/types/recipe";
 import { timeSince } from "@/lib/utils";
 import { useLike } from "@/hooks/useLike";
@@ -22,9 +22,8 @@ import {
     AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import useAuth from "@/hooks/useAuth";
-import useWebSocket from "@/hooks/useWebSocket";
 import CommentSection from "@/components/features/CommentSection";
-import {useComments} from "@/hooks/useComment";
+import { useComments } from "@/hooks/useComment";
 
 interface RecipeDetailCardProps {
     recipe: Recipe;
@@ -34,16 +33,20 @@ interface RecipeDetailCardProps {
 export default function RecipeDetailCard({ recipe, expand = false }: RecipeDetailCardProps) {
     const [expanded, setExpanded] = useState(expand);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [showComments, setShowComments] = useState(false);
     const { user } = useAuth();
     const { liked, likeCount, loading: likeLoading, error: likeError, setError: setLikeError, handleToggleLike } = useLike(recipe.id);
     const { saved, loading: savedLoading, error: savedError, setError: setSavedError, handleToggleSaved } = useSavedRecipe(recipe.id);
     const { handleUpdate, handleDelete } = useRecipeActions(recipe.id);
-    const {commentCount } = useComments(recipe.id);
-
-    useWebSocket(user?.idUser, recipe.id);
+    const { commentCount } = useComments(recipe.id);
 
     const shortDescription = recipe.description.slice(0, 170) + (recipe.description.length > 170 ? "..." : "");
     const isOwner = user?.idUser === recipe.userId;
+
+    // Reset comment section when recipe changes
+    useEffect(() => {
+        setShowComments(false);
+    }, [recipe.id]);
 
     const handleConfirmDelete = async () => {
         try {
@@ -52,6 +55,10 @@ export default function RecipeDetailCard({ recipe, expand = false }: RecipeDetai
         } catch (err) {
             setLikeError(err instanceof Error ? err.message : "Échec de la suppression de la recette");
         }
+    };
+
+    const handleCommentClick = () => {
+        setShowComments(prev => !prev);
     };
 
     return (
@@ -127,15 +134,17 @@ export default function RecipeDetailCard({ recipe, expand = false }: RecipeDetai
                     <span>{likeCount}</span>
                 </Button>
 
-                <Button variant="ghost" size="icon" asChild>
-                    <Link href="#comments">
-                        <MessageCircle className="w-6 h-6" />
-                        <span className="ml-1">{commentCount} Commentaires</span>
-                    </Link>
+                <Button variant="ghost" size="icon" onClick={handleCommentClick}>
+                    <MessageCircle className="w-6 h-6" />
+                    <span className="ml-1">{commentCount} Commentaires</span>
                 </Button>
             </div>
 
-            <CommentSection recipeId={recipe.id} />
+            {showComments && (
+                <div id={`comments-${recipe.id}`}>
+                    <CommentSection recipeId={recipe.id} />
+                </div>
+            )}
 
             {(likeError || savedError) && (
                 <AlertDialog open={!!(likeError || savedError)}>

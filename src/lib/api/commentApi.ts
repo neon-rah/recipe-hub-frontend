@@ -52,6 +52,7 @@ export const deleteComment = async (id: number): Promise<void> => {
 export const fetchComments = async (recipeId: number): Promise<CommentDTO[]> => {
     try {
         const response = await api.get(`/comments/recipe/${recipeId}`);
+        console.log("[commentApi] Fetched comments for recipe", recipeId, ":", response.data);
         return response.data as CommentDTO[];
     } catch (err) {
         const axiosError = err as AxiosError<ErrorResponse>;
@@ -66,8 +67,15 @@ export const fetchComments = async (recipeId: number): Promise<CommentDTO[]> => 
 export const fetchCommentCount = async (recipeId: number): Promise<number> => {
     try {
         const comments = await fetchComments(recipeId);
-        return comments.length;
+        // Count all comments including replies
+        const countAllComments = (comments: CommentDTO[]): number => {
+            return comments.reduce((total, comment) => {
+                return total + 1 + (comment.replies ? countAllComments(comment.replies) : 0);
+            }, 0);
+        };
+        return countAllComments(comments);
     } catch (err) {
+        console.error("[commentApi] Error fetching comment count:", err);
         return 0; // Fallback to 0 if fetching fails
     }
 };

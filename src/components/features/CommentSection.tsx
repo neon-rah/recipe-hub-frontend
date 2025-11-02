@@ -2,7 +2,7 @@
 "use client";
 import CommentItem from "./CommentItem";
 import CommentInput from "./CommentInput";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useComments } from "@/hooks/useComment";
 
 interface CommentSectionProps {
@@ -20,17 +20,21 @@ export default function CommentSection({ recipeId }: CommentSectionProps) {
 
     const [visibleReplies, setVisibleReplies] = useState<Record<number, boolean>>({});
 
-    useEffect(() => {
-        const parentComments = comments.filter(c => c.parentId === 0 || c.parentId === null);
-        const initialVisibleState: Record<number, boolean> = {};
-        parentComments.forEach(parent => {
-            initialVisibleState[parent.idComment] = false; // cacher par défaut
-        });
-        setVisibleReplies(prev => ({ ...initialVisibleState, ...prev }));
-    }, [comments]);
+    const handleReplySubmit = (parentId: number, content: string) => {
+        handleCreateReply(parentId, content);
+        // Auto-show replies when user submits a reply
+        setVisibleReplies((prev) => ({
+            ...prev,
+            [parentId]: true,
+        }));
+    };
 
-    const parentComments = comments.filter(c => c.parentId === 0 || c.parentId === null);
-    const childComments = comments.filter(c => c.parentId !== 0 && c.parentId !== null);
+    const toggleReplies = (parentId: number) => {
+        setVisibleReplies((prev) => ({
+            ...prev,
+            [parentId]: !prev[parentId],
+        }));
+    };
 
     return (
         <div className="mt-6 px-4 max-w-2xl mx-auto">
@@ -38,21 +42,15 @@ export default function CommentSection({ recipeId }: CommentSectionProps) {
                 Commentaires ({commentCount})
             </h3>
             <div className="space-y-4">
-                {parentComments.map((parent) => {
-                    const replies = childComments.filter(c => c.parentId === parent.idComment);
+                {comments.map((parent) => {
+                    const replies = parent.replies || [];
                     const show = visibleReplies[parent.idComment] ?? false;
 
                     return (
                         <div key={parent.idComment}>
                             <CommentItem
                                 comment={parent}
-                                onReply={(parentId, content) => {
-                                    handleCreateReply(parentId, content);
-                                    setVisibleReplies((prev) => ({
-                                        ...prev,
-                                        [parent.idComment]: true,
-                                    }));
-                                }}
+                                onReply={handleReplySubmit}
                                 onDelete={handleDeleteComment}
                                 level={0}
                             />
@@ -60,12 +58,7 @@ export default function CommentSection({ recipeId }: CommentSectionProps) {
                             {replies.length > 0 && (
                                 <div
                                     className="ml-12 mt-2 text-sm text-blue-600 cursor-pointer hover:underline"
-                                    onClick={() =>
-                                        setVisibleReplies((prev) => ({
-                                            ...prev,
-                                            [parent.idComment]: !show,
-                                        }))
-                                    }
+                                    onClick={() => toggleReplies(parent.idComment)}
                                 >
                                     {show
                                         ? "Masquer les réponses"

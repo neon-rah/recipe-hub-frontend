@@ -1,4 +1,4 @@
-// app/personal/layout.tsx
+// app/(personal)/layout.tsx
 "use client";
 
 import { ReactNode } from "react";
